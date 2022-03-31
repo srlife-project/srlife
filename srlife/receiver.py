@@ -116,6 +116,101 @@ class Receiver:
         return itertools.chain(
             *(panel.tubes.values() for panel in self.panels.values())
         )
+    for name, panel in self.panels.items():
+      if name not in other.panels:
+        return False
+      base = (base and panel.close(other.panels[name]))
+
+    return base
+  
+  @property
+  def tubes(self):
+    """ Shortcut iterator over all tubes
+
+      Returns:
+        iterator over panels
+    """
+    return itertools.chain(*(panel.tubes.values() 
+      for panel in self.panels.values()))
+
+  def set_paging(self, page):
+    """ Tell tubes to store results on or off disk
+
+      Args:
+        page (bool):    if true, page results to disk
+    """
+    for i,tube in enumerate(self.tubes):
+      tube.set_paging(page, i)
+
+  @property
+  def ntubes(self):
+    """ Shortcut for total number of tubes
+
+    Returns:
+      int: Number of tubes in all panels
+    """
+    return len(list(self.tubes))
+
+  @property
+  def npanels(self):
+    """ Number of panels in the receiver
+
+    Returns:
+      int:  Number of panels
+    """
+    return len(self.panels)
+
+  def add_panel(self, panel, name = None):
+    """ Add a panel object to the receiver
+
+      Args:
+        panel (Panel):          panel object
+        name (Optional[str]):   panel name, by default follows fixed scheme
+      """
+    if not name:
+      name = next_name(self.panels.keys())
+
+    self.panels[name] = panel
+
+  def save(self, fobj):
+    """ Save to an HDF5 file
+
+      This saves a Receiver object to the HDF5 format.
+
+      Args:
+        fobj (str):  either a h5py file object or a filename
+    """
+    if isinstance(fobj, str):
+      fobj = h5py.File(fobj, 'w')
+
+    fobj.attrs['period'] = self.period
+    fobj.attrs['days'] = self.days
+    fobj.attrs['stiffness'] = self.stiffness
+
+    grp = fobj.create_group("panels")
+
+    for name, panel in self.panels.items():
+      sgrp = grp.create_group(name)
+      panel.save(sgrp)
+
+  @classmethod
+  def load(cls, fobj):
+    """ Load a Receiver from an HDF5 file
+
+      A full description of the HDF format is included in the module documentation
+
+      Args:
+        fobj (string):  either a h5py file object or a filename
+
+      Returns:
+        Receiver: The constructed receiver object.
+    """
+    if isinstance(fobj, str):
+      fobj = h5py.File(fobj, 'r')
+
+    res = cls(fobj.attrs['period'], fobj.attrs['days'], fobj.attrs['stiffness'])
+
+    grp = fobj["panels"]
 
     def set_paging(self, page):
         """Tell tubes to store results on or off disk
@@ -407,253 +502,142 @@ class Tube:
       nz (int): number of axial increments
       T0 (Optional[float]): initial temperature
       page (Optional[bool]): store results on disk if True
-      multiplier (Optional[int]): number of tubes represented by this actual model, defaults to 1
+  """
+  def __init__(self, outer_radius, thickness, height, nr, nt, nz, 
+      T0 = 0.0, page = False):
+    """ Initialize the tube
     """
+    self.r = outer_radius
+    self.t = thickness
+    self.h = height
 
-    def __init__(
-        self,
-        outer_radius,
-        thickness,
-        height,
-        nr,
-        nt,
-        nz,
-        T0=0.0,
-        page=False,
-        multiplier=1,
-    ):
-        """Initialize the tube"""
-        self.r = outer_radius
-        self.t = thickness
-        self.h = height
+    self.nr = nr
+    self.nt = nt
+    self.nz = nz
 
-        self.nr = nr
-        self.nt = nt
-        self.nz = nz
+    self.abstraction = "3D"
 
-        self.abstraction = "3D"
+    self.times = []
+    self.results = {}
+    self.quadrature_results = {}
 
-        self.times = []
-        self.results = {}
-        self.quadrature_results = {}
-        self.axial_results = {}
+    self.outer_bc = None
+    self.inner_bc = None
+    self.pressure_bc = None
 
-        self.outer_bc = None
-        self.inner_bc = None
-        self.pressure_bc = None
+    self.T0 = T0
+    self.page = page
+    self.page_prefix = ""
 
-        self.T0 = T0
-        self.page = page
-        self.page_prefix = ""
+  def copy_results(self, other):
+    """ Copy the results fields from one tube to another
 
-        self.multiplier_val = multiplier
+      Parameters:
+        other:      other tube object
+    """
+    self.results = other.results
+    self.quadrature_results = other.quadrature_results
 
-    @property
-    def multiplier(self):
-        """
-        Number of actual tubes represented by this model
+  def set_paging(self, page, i):
+    """ Set the value of the page parameter
+      
+      Parameters:
+        page:       if true store results on disk
+        i:          tube number to use
+    """
+    self.page = page
+    self.page_prefix = str(i) + "_"
 
-        Returns:
-            int:    tube multiplier
-        """
-        return self.multiplier_val
+  @property
+  def ndim(self):
+    """ Number of problem dimensions
 
-    def copy_results(self, other):
-        """Copy the results fields from one tube to another
+    Returns:
+      int:  tube dimension
+    """
+    if self.abstraction == "3D":
+      return 3
+    elif self.abstraction == "2D":
+      return 2
+    elif self.abstraction == "1D":
+      return 1
+    else:
+      raise ValueError("Tube abstraction unknown!")
 
-        Parameters:
-          other:      other tube object
-        """
-        self.results = other.results
-        self.quadrature_results = other.quadrature_results
-        self.axial_results = other.axial_results
+  @property
+  def dim(self):
+    """ Actual problem discretization
 
-    def set_paging(self, page, i):
-        """Set the value of the page parameter
+    Returns:
+      tuple(int): tuple giving the fixed grid discretization
+    """
+    if self.abstraction == "3D":
+      return (self.nr, self.nt, self.nz)
+    elif self.abstraction == "2D":
+      return (self.nr, self.nt, 1)
+    elif self.abstraction == "1D":
+      return (self.nr, 1, 1)
+    else:
+      raise ValueError("Tube abstraction unknown!")
 
-        Parameters:
-          page:       if true store results on disk
-          i:          tube number to use
-        """
-        self.page = page
-        self.page_prefix = str(i) + "_"
+  @property
+  def mesh(self):
+    """ Calculate the problem mesh (should only be needed for I/O)
 
-    @property
-    def ndim(self):
-        """Number of problem dimensions
+    Returns:
+      Results of np.meshgrid over the problem discretization
+    """
+    r = np.linspace(self.r-self.t, self.r, self.nr)
+    if self.ndim > 1:
+      t = np.linspace(0, 2*np.pi, self.nt+1)[:self.nt]
+    else:
+      t = [self.angle]
+    if self.ndim > 2:
+      z = np.linspace(0, self.h, self.nz)
+    else:
+      z = [self.plane]
 
-        Returns:
-          int:  tube dimension
-        """
-        if self.abstraction == "3D":
-            return 3
-        elif self.abstraction == "2D":
-            return 2
-        elif self.abstraction == "1D":
-            return 1
-        else:
-            raise ValueError("Tube abstraction unknown!")
+    return np.meshgrid(*[r,t,z], indexing = 'ij')
 
-    @property
-    def dim(self):
-        """Actual problem discretization
+  def element_volumes(self):
+    """ Calculate the element volumes
 
-        Returns:
-          tuple(int): tuple giving the fixed grid discretization
-        """
-        if self.abstraction == "3D":
-            return (self.nr, self.nt, self.nz)
-        elif self.abstraction == "2D":
-            return (self.nr, self.nt, 1)
-        elif self.abstraction == "1D":
-            return (self.nr, 1, 1)
-        else:
-            raise ValueError("Tube abstraction unknown!")
+    Returns:
+      np.array with each element volume
+    """
+    if self.ndim == 1:
+      return self._volume1d()
+    elif self.ndim == 2:
+      return self._volume2d()
+    elif self.ndim == 3:
+      return self._volume3d()
+    else:
+      raise ValueError("Internal error: tube dimension is %i" % self.ndim)
 
-    @property
-    def mesh(self):
-        """Calculate the problem mesh (should only be needed for I/O)
+  def _volume1d(self):
+    """
+      1D volume calculator
+    """
+    r = np.linspace(self.r-self.t, self.r, self.nr)
+    return np.pi * (r[1:]**2.0 - r[:-1]**2.0) * self.h
 
-        Returns:
-          Results of np.meshgrid over the problem discretization
-        """
-        r = np.linspace(self.r - self.t, self.r, self.nr)
-        if self.ndim > 1:
-            t = np.linspace(0, 2 * np.pi, self.nt + 1)[: self.nt]
-        else:
-            t = [self.angle]
-        if self.ndim > 2:
-            z = np.linspace(0, self.h, self.nz)
-        else:
-            z = [self.plane]
+  def _volume2d(self):
+    """
+      1D volume calculator
+    """
+    r = np.linspace(self.r-self.t, self.r, self.nr)
+    t = np.linspace(0, 2*np.pi, self.nt+1)
+    theta = np.diff(t)
+    
+    a = np.outer(2*r[:-1], np.sin(theta/2))
+    b = np.outer(2*r[1:], np.sin(theta/2))
+    edge = r[1:] - r[:-1]
 
-        return np.meshgrid(*[r, t, z], indexing="ij")
+    h = np.sqrt(edge[:,None]**2.0 - ((b-a)/2)**2.0)
 
-    def element_volumes(self):
-        """Calculate the element volumes
+    base = 0.5*(a+b)*h
 
-        Returns:
-          np.array with each element volume
-        """
-        if self.ndim == 1:
-            return self._volume1d()
-        elif self.ndim == 2:
-            return self._volume2d()
-        elif self.ndim == 3:
-            return self._volume3d()
-        else:
-            raise ValueError("Internal error: tube dimension is %i" % self.ndim)
-
-    def _volume1d(self):
-        """
-        1D volume calculator
-        """
-        r = np.linspace(self.r - self.t, self.r, self.nr)
-        return np.pi * (r[1:] ** 2.0 - r[:-1] ** 2.0) * self.h
-
-    def _volume2d(self):
-        """
-        1D volume calculator
-        """
-        r = np.linspace(self.r - self.t, self.r, self.nr)
-        t = np.linspace(0, 2 * np.pi, self.nt + 1)
-        theta = np.diff(t)
-
-        a = np.outer(2 * r[:-1], np.sin(theta / 2))
-        b = np.outer(2 * r[1:], np.sin(theta / 2))
-        edge = r[1:] - r[:-1]
-
-        h = np.sqrt(edge[:, None] ** 2.0 - ((b - a) / 2) ** 2.0)
-
-        base = 0.5 * (a + b) * h
-
-        return (base * self.h).flatten()
-
-    def _volume3d(self):
-        """
-        3D volume calculator
-        """
-        r = np.linspace(self.r - self.t, self.r, self.nr)
-        t = np.linspace(0, 2 * np.pi, self.nt + 1)
-        z = np.linspace(0, self.h, self.nz)
-        theta = np.diff(t)
-
-        a = np.outer(2 * r[:-1], np.sin(theta / 2))
-        b = np.outer(2 * r[1:], np.sin(theta / 2))
-        edge = r[1:] - r[:-1]
-
-        h = np.sqrt(edge[:, None] ** 2.0 - ((b - a) / 2) ** 2.0)
-
-        base = 0.5 * (a + b) * h
-
-        heights = np.diff(z)
-
-        return np.einsum("k,ij", heights, base).flatten()
-
-    def write_vtk(self, fname):
-        """Write to a VTK file
-
-        The tube VTK files are only used for output and
-        postprocessign
-
-        Args:
-          fname (string): base filename
-        """
-        writer = writers.VTKWriter(self, fname)
-        writer.write()
-
-    def make_2D(self, height):
-        """Abstract the tube as 2D
-
-        Reduce to a 2D abstraction by slicing the tube at the
-        indicated height
-
-        Args:
-          height (float): the height at which to slice
-        """
-        if height < 0.0 or height > self.h:
-            raise ValueError("2D slice height must be within the tube height")
-
-        self.abstraction = "2D"
-        self.plane = height
-
-    def make_1D(self, height, angle):
-        """Abstract the tube as 1D
-
-        Reduce to a 1D abstraction along a ray given by the provided
-        height and angle.
-
-        Args:
-          height (float): the height of the ray
-          angle (float): the angle, in radians
-        """
-        if height < 0.0 or height > self.h:
-            raise ValueError("Ray height must be within the tube height")
-
-        self.abstraction = "1D"
-        self.plane = height
-        self.angle = angle
-
-    def close(self, other):
-        """Check to see if two objects are nearly equal.
-
-        Primarily used for testing
-
-        Args:
-          other (Tube): the object to compare against
-
-        Returns:
-          bool: true if the tubes are similar
-        """
-        base = (
-            np.isclose(self.r, other.r)
-            and np.isclose(self.t, other.t)
-            and np.isclose(self.h, other.h)
-            and (self.nr == other.nr)
-            and (self.nt == other.nt)
-            and (self.nz == other.nz)
-            and (np.allclose(self.times, other.times))
-        )
+    return (base * self.h).flatten()
 
         for name, data in self.results.items():
             if name not in other.results:
@@ -1004,6 +988,226 @@ def _make_ifn(base):
 
     return ifn
 
+  def add_blank_results(self, name, shape):
+    """ Add a blank node point result field
+
+      Args:
+        name (str): parameter set name
+        shape (tuple): required shape
+    """
+    self._check_rdim(shape)
+    self.results[name] = self._setup_memmap(name + "_node", shape)
+
+  def add_quadrature_results(self, name, data):
+    """ Add a result at the quadrature points
+
+      Args:
+        name (str): parameter set name
+        data (np.array): actual results data
+    """
+    if data.shape[0] != self.ntime:
+      raise ValueError("Quadrature data must have time axis first!")
+    self.quadrature_results[name] = self._setup_memmap(name + "_quad", data.shape)
+    self.quadrature_results[name][:] = data[:]
+
+  def add_blank_quadrature_results(self, name, shape):
+    """ Add a blank quadrature point result field
+
+      Args:
+        name (str): parameter set name
+        shape (tuple): required shape
+    """
+    if shape[0] != self.ntime:
+      raise ValueError("Quadrature data must have time axis first!")
+    self.quadrature_results[name] = self._setup_memmap(name + "_quad", shape)
+
+  def _setup_memmap(self, name, shape):
+    """ Map array to disk if required
+      
+      Args:
+        name:   field name
+        shape:  required shape
+    """
+    if self.page:
+      return np.memmap(self.page_prefix + name + ".dat", dtype = np.float64, 
+              mode = 'w+', shape = shape)
+    else:
+      return np.zeros(shape)
+
+  def _check_rdim(self, shape):
+    """ Verify the dimensions of a results array
+
+      Make sure the results array aligns with the correct dimension for the
+      abstraction
+
+      Args:
+        shape (tuple): input shape
+
+      Raises:
+        ValueError: If the data array shape is not correct for the problem dimensions
+    """
+    if self.abstraction == "3D":
+      if shape != (self.ntime, self.nr, self.nt, self.nz):
+        raise ValueError("Data array shape must equal ntime x nr x nt x nz!")
+    elif self.abstraction == "2D":
+      if shape != (self.ntime, self.nr, self.nt):
+        raise ValueError("Data array shape must equal ntime x nr x nt!")
+    elif self.abstraction == "1D":
+      if shape != (self.ntime, self.nr):
+        raise ValueError("Data array shape must equal ntime x nr!")
+    else:
+      raise ValueError("Internal error: unknown abstraction type %s" % 
+          self.abstraction)
+
+  def set_bc(self, bc, loc):
+    """ Set the inner or outer heat flux BC
+
+      Args:
+        bc (ThermalBC):  boundary condition object
+        loc (string): location -- either "inner" or "outer" wall
+    """
+    if loc == "inner":
+      if not np.isclose(bc.r, self.r - self.t) or not np.isclose(bc.h, self.h):
+        raise ValueError("Inner BC radius must match inner tube radius!")
+      self.inner_bc = bc
+    elif loc == "outer":
+      if not np.isclose(bc.r, self.r) or not np.isclose(bc.h, self.h):
+        raise ValueError("Outer BC radius must match outer tube radius!")
+      self.outer_bc = bc
+    else:
+      raise ValueError("Wall location must be either inner or outer")
+
+  def set_pressure_bc(self, bc):
+    """ Set the pressure boundary condition
+
+      Args:
+        bc (PressureBC):  boundary condition object
+    """
+    self.pressure_bc = bc
+
+  def save(self, fobj):
+    """ Save to an HDF5 file
+
+      Args:
+        fobj (h5py.Group):  h5py group to save to
+    """
+    fobj.attrs["r"] = self.r
+    fobj.attrs["t"] = self.t
+    fobj.attrs["h"] = self.h
+
+    fobj.attrs["nr"] = self.nr
+    fobj.attrs["nt"] = self.nt
+    fobj.attrs["nz"] = self.nz
+
+    fobj.attrs["abstraction"] = self.abstraction
+    if self.abstraction == "2D" or self.abstraction == "1D":
+      fobj.attrs["plane"] = self.plane
+    if self.abstraction == "1D":
+      fobj.attrs["angle"] = self.angle
+
+    fobj.create_dataset("times", data = self.times)
+
+    grp = fobj.create_group("results")
+    for name, result in self.results.items():
+      grp.create_dataset(name, data = result)
+
+    grp = fobj.create_group("quadrature_results")
+    for name, result in self.quadrature_results.items():
+      grp.create_dataset(name, data = result)
+
+    if self.outer_bc:
+      grp = fobj.create_group("outer_bc")
+      self.outer_bc.save(grp)
+
+    if self.inner_bc:
+      grp = fobj.create_group("inner_bc")
+      self.inner_bc.save(grp)
+
+    if self.pressure_bc:
+      grp = fobj.create_group("pressure_bc")
+      self.pressure_bc.save(grp)
+
+    fobj.attrs["T0"] = self.T0
+
+  @classmethod
+  def load(cls, fobj):
+    """ Load from an HDF5 file
+
+      Parameters:
+        fobj (h5py.Group):  h5py to load from
+    """
+    res = cls(fobj.attrs["r"], fobj.attrs["t"], fobj.attrs["h"], fobj.attrs["nr"], fobj.attrs["nt"],
+        fobj.attrs["nz"], T0 = fobj.attrs["T0"])
+
+    res.abstraction = fobj.attrs["abstraction"]
+    if res.abstraction == "2D" or res.abstraction == "1D":
+      res.plane = fobj.attrs["plane"]
+    if res.abstraction == "1D":
+      res.angle = fobj.attrs["angle"]
+
+    res.set_times(np.copy(fobj["times"]))
+
+    grp = fobj["results"]
+    for name in grp:
+      res.add_results(name, np.copy(grp[name]))
+
+    grp = fobj["quadrature_results"]
+    for name in grp:
+      res.add_quadrature_results(name, np.copy(grp[name]))
+
+    if "outer_bc" in fobj:
+      res.set_bc(ThermalBC.load(fobj["outer_bc"]), "outer")
+
+    if "inner_bc" in fobj:
+      res.set_bc(ThermalBC.load(fobj["inner_bc"]), "inner")
+
+    if "pressure_bc" in fobj:
+      res.set_pressure_bc(PressureBC.load(fobj["pressure_bc"]))
+
+    return res
+
+def _vector_interpolate(base, data):
+  """ Interpolate as a vector
+
+  Args:
+    base (function): base interpolation method
+    data (np.array): data to interpolate
+  """
+  res = np.zeros(data[0].shape)
+  
+  # pylint: disable=not-an-iterable
+  for ind in np.ndindex(*res.shape):
+    res[ind] = base([d[ind] for d in data])
+
+  return res
+
+def _make_ifn(base):
+  """ Helper to deal with getting both a scalar and a vector input
+
+  Args:
+    base (function): base interpolation method
+
+  Returns:
+    function: a function that interpolates a vector using base at each component
+  """
+  def ifn(mdata):
+    """
+      Interpolation function that handles both the scalar and vector cases
+    """
+    allscalar = all(map(np.isscalar, mdata))
+    anyscalar = any(map(np.isscalar, mdata))
+    if allscalar:
+      return base(mdata)
+    elif anyscalar:
+      shapes = [a.shape for a in mdata if not np.isscalar(a)]
+      # Could check they are all the same, but eh
+      shape = shapes[0]
+      ndata = [np.ones(shape) * d for d in mdata]
+      return _vector_interpolate(base, ndata)
+    else:
+      return _vector_interpolate(base, ndata)
+
+  return ifn
 
 class PressureBC:
     """Stores information about the tube internal pressure
