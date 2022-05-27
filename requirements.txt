@@ -13,6 +13,4 @@ tqdm
 multiprocess
 dill
 parameterized
-black==22.1.0
-jax[cpu]
-absl-py
+black
