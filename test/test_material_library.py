@@ -4,7 +4,6 @@ from srlife import library
 
 fluids = ["salt"]
 alloys = ["316H", "800H", "A617", "740H", "A282", "A230"]
-thermalfluids = ["32MgCl2-68KCl.xml"]
 
 
 class TestMaterials(unittest.TestCase):

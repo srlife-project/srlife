@@ -1,4 +1,4 @@
-# pylint: disable=unused-wildcard-import, wildcard-import, too-many-lines
+# pylint: disable=unused-wildcard-import, wildcard-import
 
 """
   This module solves the receiver system or the single tube

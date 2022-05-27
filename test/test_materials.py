@@ -190,10 +190,10 @@ class TestStructuralMaterial(unittest.TestCase):
         cutoff = 1.5e-3
         sum = 0
         if self.erange <= cutoff:
-            for b, m in zip(a, n):
+            for (b, m) in zip(a, n):
                 sum += b * np.log10(cutoff) ** m
         else:
-            for b, m in zip(a, n):
+            for (b, m) in zip(a, n):
                 sum += b * np.log10(self.erange) ** m
         return 10**sum
 
@@ -208,7 +208,7 @@ class TestStructuralMaterial(unittest.TestCase):
         a = np.array([-1475.23, 7289.41, -16642.64, 35684.60])
         n = np.array([3, 2, 1, 0])
         sum = 0
-        for b, m in zip(a, n):
+        for (b, m) in zip(a, n):
             sum += b * np.log10(self.stress) ** m
         sum = 10 ** (sum / self.T - C)
 
@@ -244,26 +244,11 @@ class TestStandardCeramicMaterial(unittest.TestCase):
     def setUp(self):
         self.Ts = np.array([25.0, 800.0, 1000.0, 1200.0, 1400.0, 1500.0])
         self.s0s = np.array([507.0, 467.0, 528.0, 570.0, 746.0, 461.0])
-        self.mTs = np.array([25.0, 1500.0])
-        self.ms = np.array([10.7, 9.2])
+        self.m = 10.7
         self.c_bar = 1.5
-        self.nu = 0.17
-        self.NvTs = np.array([25.0, 1000.0, 1500.0])
-        self.Nvs = np.array([30.0, 30.0, 30.0])
-        self.BvTs = np.array([25.0, 1000.0, 1500.0])
-        self.Bvs = np.array([320.0, 320.0, 320.0])
 
         self.mat = materials.StandardCeramicMaterial(
-            self.Ts,
-            self.s0s,
-            self.mTs,
-            self.ms,
-            self.c_bar,
-            self.nu,
-            self.NvTs,
-            self.Nvs,
-            self.BvTs,
-            self.Bvs,
+            self.Ts, self.s0s, self.m, self.c_bar
         )
 
     def test_strength(self):
@@ -276,11 +261,10 @@ class TestStandardCeramicMaterial(unittest.TestCase):
         self.assertAlmostEqual(a, b)
 
     def test_m(self):
-        ifn = inter.interp1d(self.mTs, self.ms)
         T = 1099.1
 
         a = self.mat.modulus(T)
-        b = ifn(T)
+        b = self.m
 
         self.assertAlmostEqual(a, b)
 
@@ -292,47 +276,13 @@ class TestStandardCeramicMaterial(unittest.TestCase):
 
         self.assertAlmostEqual(a, b)
 
-    def test_nu(self):
-        T = 1099.1
-
-        a = self.mat.nu(T)
-        b = self.nu
-        self.assertAlmostEqual(a, b)
-
-    def test_Nv(self):
-        ifn = inter.interp1d(self.NvTs, self.Nvs)
-        T = 1099.1
-
-        a = self.mat.Nv(T)
-        b = ifn(T)
-
-        self.assertAlmostEqual(a, b)
-
-    def test_Bv(self):
-        ifn = inter.interp1d(self.BvTs, self.Bvs)
-        T = 1099.1
-
-        a = self.mat.Bv(T)
-        b = ifn(T)
-
-        self.assertAlmostEqual(a, b)
-
     def test_store_receover(self):
         tfile = tempfile.mktemp()
         self.mat.save(tfile, "blah")
         test = materials.CeramicMaterial.load(tfile, "blah")
 
-        self.assertTrue(np.allclose(test.s_temperatures, self.Ts))
+        self.assertTrue(np.allclose(test.temperatures, self.Ts))
         self.assertTrue(np.allclose(test.strengths, self.s0s))
 
-        self.assertTrue(np.allclose(test.m_temperatures, self.mTs))
-        self.assertTrue(np.allclose(test.mvals, self.ms))
-
+        self.assertTrue(np.isclose(test.m, self.m))
         self.assertTrue(np.isclose(test.C, self.c_bar))
-        self.assertTrue(np.isclose(test.nu_val, self.nu))
-
-        self.assertTrue(np.allclose(test.Nv_temperatures, self.NvTs))
-        self.assertTrue(np.allclose(test.Nvvals, self.Nvs))
-
-        self.assertTrue(np.allclose(test.Bv_temperatures, self.BvTs))
-        self.assertTrue(np.allclose(test.Bvvals, self.Bvs))

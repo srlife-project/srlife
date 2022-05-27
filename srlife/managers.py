@@ -137,65 +137,7 @@ class SolutionManager:
             decorator=self.progress_decorator,
         )
 
-    def solve_reliability(self, time):
-        """User interface: solve everything and return receiver reliability
-
-        The trigger for everything: solve the complete problem and report the
-        best-estimate reliability.
-
-        Args:
-            time (float): time at which to report reliability
-
-        Returns:
-          float:  Reliability between 0 and 1
-        """
-        self.solve_heat_transfer()
-        self.solve_structural()
-
-        return self.calculate_reliability(time)
-
-    def calculate_reliability(self, time):
-        """Calculate reliability from the results
-
-        Args:
-            time (float): time at which to report reliability
-
-        Returns:
-          float:    Reliability between 0 and 1
-        """
-        if self.progress:
-            print("Calculating reliability :")
-        return self.damage_model.determine_reliability(
-            self.receiver,
-            self.damage_material,
-            time,
-            nthreads=self.nthreads,
-            decorator=self.progress_decorator,
-        )
-
     def solve_heat_transfer(self):
-        """Solve heat transfer for the receiver
-
-        Adds thermal results in each tube
-        """
-        if isinstance(self.thermal_solver, thermal.ThermohydraulicsThermalSolver):
-            if self.progress:
-                print("Running thermohydraulic analysis")
-            self.thermal_solver.solve_receiver(
-                self.receiver,
-                self.thermal_material,
-                self.fluid_material,
-                decorator=self.progress_decorator,
-                nthreads=self.nthreads,
-                **merge_dicts(
-                    h.args_for_thermohydraulic_solver(self.receiver)
-                    for h in self.heuristics
-                )
-            )
-        else:
-            self.solve_heat_transfer_tube()
-
-    def solve_heat_transfer_tube(self):
         """Solve the heat transfer problem for each tube
 
         Adds the thermal results to each receiver.Tube object
@@ -244,8 +186,13 @@ class SolutionManager:
 class Heuristic:
     """Solution heuristic superclass
 
-    Class that defines a heuristic to modify the basic 3D solve process in some
-    way.
+        Args:
+          receiver (receiver.receiver):       receiver object affected
+          tube (receiver.tube):               tube object affected
+        """
+        resetter = thermal.TemperatureResetter(
+            lambda t: np.isclose(t % receiver.period, 0), tube.T0
+        )
 
     To implement a specific heuristic override the appropriate pure virtual
     methods.
@@ -257,15 +204,6 @@ class Heuristic:
         Args:
           receiver (receiver.receiver):       receiver object affected
           tube (receiver.tube):               tube object affected
-
-        """
-        return {}
-
-    def args_for_thermohydraulic_solver(self, receiver):
-        """Add tube solver args
-
-        Args:
-          receiver (receiver.receiver):       receiver object affected
 
         """
         return {}
@@ -285,19 +223,6 @@ class CycleResetHeuristic(Heuristic):
         """
         resetter = thermal.TemperatureResetter(
             lambda t: np.isclose(t % receiver.period, 0), tube.T0
-        )
-
-        return {"resetters": [resetter]}
-
-    def args_for_thermohydraulic_solver(self, receiver):
-        """Add tube solver args
-
-        Args:
-          receiver (receiver.receiver):       receiver object affected
-
-        """
-        resetter = thermal.ReceiverResetter(
-            lambda t: np.isclose(t % receiver.period, 0)
         )
 
         return {"resetters": [resetter]}
