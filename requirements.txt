@@ -1,5 +1,5 @@
 numpy
-scipy==1.9.2
+scipy
 h5py
 vtk
 nose
