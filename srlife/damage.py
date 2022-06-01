@@ -502,6 +502,7 @@ class SMMModelPennyShapedFlaw(CrackShapeDependent):
             )
         )
 
+
 class DamageCalculator:
     """
     Parent class for all damage calculators, handling common iteration
