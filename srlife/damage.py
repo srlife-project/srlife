@@ -130,6 +130,7 @@ class CrackShapeIndependent(WeibullFailureModel):
     """
     Parent class for crack shape dependent models
     """
+
     def __init__(self, pset, *args, **kwargs):
         """
         Create a mesh grid for integration
@@ -139,8 +140,8 @@ class CrackShapeIndependent(WeibullFailureModel):
         super().__init__(pset, *args, **kwargs)
 
         # limits and number of segments for angles
-        self.nalpha = pset.get_default("nalpha",21)
-        self.nbeta = pset.get_default("nbeta",31)
+        self.nalpha = pset.get_default("nalpha", 21)
+        self.nbeta = pset.get_default("nbeta", 31)
 
         # Mesh grid of the vectorized angle values
         self.A, self.B = np.meshgrid(
@@ -177,6 +178,7 @@ class CrackShapeDependent(WeibullFailureModel):
     """
     Parent class for crack shape dependent models
     """
+
     def __init__(self, pset, *args, **kwargs):
         """
         Create a mesh grid for integration
@@ -186,8 +188,8 @@ class CrackShapeDependent(WeibullFailureModel):
         super().__init__(pset, *args, **kwargs)
 
         # limits and number of segments for angles
-        self.nalpha = pset.get_default("nalpha",121)
-        self.nbeta = pset.get_default("nbeta",121)
+        self.nalpha = pset.get_default("nalpha", 121)
+        self.nbeta = pset.get_default("nbeta", 121)
 
         # Mesh grid of the vectorized angle values
         self.A, self.B = np.meshgrid(
@@ -483,8 +485,7 @@ class MTSModelPennyShapedFlaw(CrackShapeDependent):
         tau = self.calculate_shear_stress(mandel_stress)
         # Projected equivalent stress
         return 0.5 * (
-            sigma_n
-            + np.sqrt((sigma_n**2) + ((tau / (1 - (0.5 * self.nu))) ** 2))
+            sigma_n + np.sqrt((sigma_n**2) + ((tau / (1 - (0.5 * self.nu))) ** 2))
         )
 
 
@@ -563,10 +564,7 @@ class SMMModelGriffithFlaw(CrackShapeDependent):
         tau = self.calculate_shear_stress(mandel_stress)
 
         # Projected equivalent stress
-        return 0.5 * (
-            sigma_n
-            + np.sqrt((sigma_n**2) + ((2 * tau / self.cbar) ** 2))
-        )
+        return 0.5 * (sigma_n + np.sqrt((sigma_n**2) + ((2 * tau / self.cbar) ** 2)))
 
 
 class SMMModelPennyShapedFlaw(CrackShapeDependent):
@@ -597,10 +595,7 @@ class SMMModelPennyShapedFlaw(CrackShapeDependent):
         # Projected equivalent stress
         return 0.5 * (
             sigma_n
-            + np.sqrt(
-                (sigma_n**2)
-                + ((4 * tau / (self.cbar * (2 - self.nu))) ** 2)
-            )
+            + np.sqrt((sigma_n**2) + ((4 * tau / (self.cbar * (2 - self.nu))) ** 2))
         )
 
 
