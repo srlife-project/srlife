@@ -350,13 +350,10 @@ class PIAModel(CrackShapeIndependent):
           volumes:        element volumes
           material:       material model  object with required data
         """
-        self.temperatures = temperatures
-        self.material = material
-
         # Material parameters
-        self.svals = self.material.strength(temperatures)
-        self.mvals = self.material.modulus(temperatures)
-        self.kvals = self.svals ** (-self.mvals)
+        svals = material.strength(temperatures)
+        mvals = material.modulus(temperatures)
+        kvals = svals ** (-mvals)
 
         # Principal stresses
         pstress = self.calculate_principal_stress(mandel_stress)
@@ -364,7 +361,7 @@ class PIAModel(CrackShapeIndependent):
         # Only tension
         pstress[pstress < 0] = 0
 
-        return -self.kvals * np.sum(pstress ** self.mvals[..., None], axis=-1) * volumes
+        return -kvals * np.sum(pstress ** mvals[..., None], axis=-1) * volumes
 
 
 class WNTSAModel(CrackShapeIndependent):
@@ -389,7 +386,7 @@ class WNTSAModel(CrackShapeIndependent):
         # to rational numbers
         with np.errstate(invalid="ignore"):
             integral = (
-                (sigma_n ** self.mvals[..., None, None])
+                (sigma_n ** mvals[..., None, None])
                 * np.sin(self.A)
                 * self.dalpha
                 * self.dbeta
@@ -423,23 +420,20 @@ class WNTSAModel(CrackShapeIndependent):
           material:       material model  object with required data
         """
 
-        self.temperatures = temperatures
-        self.material = material
-
         # Material parameters
-        self.svals = self.material.strength(temperatures)
-        self.mvals = self.material.modulus(temperatures)
-        self.kvals = self.svals ** (-self.mvals)
-        self.kpvals = (2 * self.mvals + 1) * self.kvals
+        svals = material.strength(temperatures)
+        mvals = material.modulus(temperatures)
+        kvals = svals ** (-mvals)
+        kpvals = (2 * mvals + 1) * kvals
 
         # Average normal tensile stress raied to exponent mv
         avg_nstress = (
             self.calculate_avg_normal_stress(
-                mandel_stress, self.mvals, self.temperatures, self.material
+                mandel_stress, mvals, temperatures, material
             )
-        ) ** (1 / self.mvals)
+        ) ** (1 / mvals)
 
-        return -self.kpvals * (avg_nstress**self.mvals) * volumes
+        return -kpvals * (avg_nstress**mvals) * volumes
 
 
 class MTSModelGriffithFlaw(CrackShapeDependent):
@@ -476,16 +470,13 @@ class MTSModelPennyShapedFlaw(CrackShapeDependent):
         """
 
         # Material parameters
-        self.temperatures = temperatures
-        self.material = material
-
-        self.nu = self.material.nu(temperatures).flat[0]
+        nu = material.nu(temperatures).flat[0]
 
         sigma_n = self.calculate_normal_stress(mandel_stress)
         tau = self.calculate_shear_stress(mandel_stress)
         # Projected equivalent stress
         return 0.5 * (
-            sigma_n + np.sqrt((sigma_n**2) + ((tau / (1 - (0.5 * self.nu))) ** 2))
+            sigma_n + np.sqrt((sigma_n**2) + ((tau / (1 - (0.5 * nu))) ** 2))
         )
 
 
@@ -523,10 +514,7 @@ class CSEModelPennyShapedFlaw(CrackShapeDependent):
         """
 
         # Material parameters
-        self.temperatures = temperatures
-        self.material = material
-
-        self.nu = self.material.nu(temperatures).flat[0]
+        nu = material.nu(temperatures).flat[0]
 
         # Normal stress
         sigma_n = self.calculate_normal_stress(mandel_stress)
@@ -535,7 +523,7 @@ class CSEModelPennyShapedFlaw(CrackShapeDependent):
         tau = self.calculate_shear_stress(mandel_stress)
 
         # Projected equivalent stress
-        return np.sqrt((sigma_n**2) + (tau / (1 - (0.5 * self.nu))) ** 2)
+        return np.sqrt((sigma_n**2) + (tau / (1 - (0.5 * nu))) ** 2)
 
 
 class SMMModelGriffithFlaw(CrackShapeDependent):
@@ -551,11 +539,7 @@ class SMMModelGriffithFlaw(CrackShapeDependent):
         """
 
         # Material parameters
-        self.temperatures = temperatures
-        self.material = material
-
-        self.nu = self.material.nu(temperatures).flat[0]
-        self.cbar = self.material.c_bar(temperatures).flat[0]
+        cbar = material.c_bar(temperatures).flat[0]
 
         # Normal stress
         sigma_n = self.calculate_normal_stress(mandel_stress)
@@ -564,7 +548,7 @@ class SMMModelGriffithFlaw(CrackShapeDependent):
         tau = self.calculate_shear_stress(mandel_stress)
 
         # Projected equivalent stress
-        return 0.5 * (sigma_n + np.sqrt((sigma_n**2) + ((2 * tau / self.cbar) ** 2)))
+        return 0.5 * (sigma_n + np.sqrt((sigma_n**2) + ((2 * tau / cbar) ** 2)))
 
 
 class SMMModelPennyShapedFlaw(CrackShapeDependent):
@@ -580,11 +564,8 @@ class SMMModelPennyShapedFlaw(CrackShapeDependent):
         """
 
         # Material parameters
-        self.temperatures = temperatures
-        self.material = material
-
-        self.nu = self.material.nu(temperatures).flat[0]
-        self.cbar = self.material.c_bar(temperatures).flat[0]
+        nu = material.nu(temperatures).flat[0]
+        cbar = material.c_bar(temperatures).flat[0]
 
         # Normal stress
         sigma_n = self.calculate_normal_stress(mandel_stress)
@@ -594,8 +575,7 @@ class SMMModelPennyShapedFlaw(CrackShapeDependent):
 
         # Projected equivalent stress
         return 0.5 * (
-            sigma_n
-            + np.sqrt((sigma_n**2) + ((4 * tau / (self.cbar * (2 - self.nu))) ** 2))
+            sigma_n + np.sqrt((sigma_n**2) + ((4 * tau / (cbar * (2 - nu))) ** 2))
         )
 
 
