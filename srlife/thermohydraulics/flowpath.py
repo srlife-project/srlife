@@ -9,9 +9,9 @@ import scipy.interpolate as inter
 import scipy.sparse as sp
 import scipy.sparse.linalg as spla
 
-import jax
+from jax.config import config
 
-jax.config.update("jax_enable_x64", True)
+config.update("jax_enable_x64", True)
 import jax.numpy as jnp
 from jax import jacfwd
 
