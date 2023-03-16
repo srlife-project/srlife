@@ -129,26 +129,45 @@ class TestPIAModel(unittest.TestCase):
         # )
 
         # data = np.loadtxt("Spinning_disk_cyclic_60000_70000.txt")
+        # data = np.loadtxt(
+        #     os.path.join(
+        #         os.path.dirname(os.path.abspath(__file__)),
+        #         "Spinning_disk_cyclic_60000_70000.txt",
+        #         # "Spinning_disk_cyclic_60000_80000.txt",
+        #     )
+        # )
+        # data = np.loadtxt("Spinning_disk_static_60000.txt")
         data = np.loadtxt(
             os.path.join(
                 os.path.dirname(os.path.abspath(__file__)),
-                "Spinning_disk_cyclic_60000_70000.txt",
-                # "Spinning_disk_cyclic_60000_80000.txt",
-            )
+                # "Spinning_disk_60k_70k.csv",
+                "Spinning_disk_60k_80k.csv",
+            ),
+            delimiter=",",
+            skiprows=1,
+            usecols=list(range(1, 49)),
         )
-        # data = np.loadtxt("Spinning_disk_static_60000.txt")
 
         self.stress = data.reshape(data.shape[0], 8, -1)
 
-        vol_factor = 360 / 360
+        vol_factor = 360 / 15
+        # self.volumes = np.loadtxt(
+        #     os.path.join(
+        #         os.path.dirname(os.path.abspath(__file__)),
+        #         "Spinning_disk_volumes.txt",
+        #     )
+        # )
+
         self.volumes = np.loadtxt(
             os.path.join(
                 os.path.dirname(os.path.abspath(__file__)),
-                "Spinning_disk_volumes.txt",
-            )
+                "volumes_8.csv",
+            ),
+            delimiter=",",
+            # skiprows=1,
+            # usecols=list(range(1, 55)),
         )
         self.volumes = vol_factor * self.volumes
-
         self.temperatures = np.ones((data.shape[0], 8))
 
         # Number of cycles to failure
@@ -204,28 +223,45 @@ class TestPIAModel(unittest.TestCase):
 class TestCSEModelGriffithFlaw(unittest.TestCase):
     def setUp(self):
         # data = np.loadtxt("Spinning_disk_cyclic_60000_70000.txt")
+        # data = np.loadtxt(
+        #     os.path.join(
+        #         os.path.dirname(os.path.abspath(__file__)),
+        #         "Spinning_disk_cyclic_60000_70000.txt",
+        #         # "Spinning_disk_cyclic_60000_80000.txt",
+        #     )
+        # )
+        # data = np.loadtxt("Spinning_disk_static_60000.txt")
         data = np.loadtxt(
             os.path.join(
                 os.path.dirname(os.path.abspath(__file__)),
-                "Spinning_disk_cyclic_60000_70000.txt",
-                # "Spinning_disk_cyclic_60000_80000.txt",
-            )
+                # "Spinning_disk_60k_70k.csv",
+                "Spinning_disk_60k_80k.csv",
+            ),
+            delimiter=",",
+            skiprows=1,
+            usecols=list(range(1, 49)),
         )
-        # data = np.loadtxt("Spinning_disk_static_60000.txt")
 
         self.stress = data.reshape(data.shape[0], 8, -1)
 
-        vol_factor = 1
+        vol_factor = 360 / 15
+        # self.volumes = np.loadtxt(
+        #     os.path.join(
+        #         os.path.dirname(os.path.abspath(__file__)),
+        #         "Spinning_disk_volumes.txt",
+        #     )
+        # )
+
         self.volumes = np.loadtxt(
             os.path.join(
                 os.path.dirname(os.path.abspath(__file__)),
-                "Spinning_disk_volumes.txt",
-            )
+                "volumes_8.csv",
+            ),
+            delimiter=",",
+            # skiprows=1,
+            # usecols=list(range(1, 55)),
         )
         self.volumes = vol_factor * self.volumes
-        # self.volumes = vol_factor * (np.tile(self.volumes, data.shape[0])).reshape(
-        #     data.shape[0], 8
-        # )
 
         self.temperatures = np.ones((data.shape[0], 8))
 
@@ -288,28 +324,45 @@ class TestCSEModelGriffithFlaw(unittest.TestCase):
 class TestCSEModelPennyShapedFlaw(unittest.TestCase):
     def setUp(self):
         # data = np.loadtxt("Spinning_disk_cyclic_60000_70000.txt")
+        # data = np.loadtxt(
+        #     os.path.join(
+        #         os.path.dirname(os.path.abspath(__file__)),
+        #         "Spinning_disk_cyclic_60000_70000.txt",
+        #         # "Spinning_disk_cyclic_60000_80000.txt",
+        #     )
+        # )
+        # data = np.loadtxt("Spinning_disk_static_60000.txt")
         data = np.loadtxt(
             os.path.join(
                 os.path.dirname(os.path.abspath(__file__)),
-                "Spinning_disk_cyclic_60000_70000.txt",
-                # "Spinning_disk_cyclic_60000_80000.txt",
-            )
+                # "Spinning_disk_60k_70k.csv",
+                "Spinning_disk_60k_80k.csv",
+            ),
+            delimiter=",",
+            skiprows=1,
+            usecols=list(range(1, 49)),
         )
-        # data = np.loadtxt("Spinning_disk_static_60000.txt")
 
         self.stress = data.reshape(data.shape[0], 8, -1)
 
-        vol_factor = 1
+        vol_factor = 360 / 15
+        # self.volumes = np.loadtxt(
+        #     os.path.join(
+        #         os.path.dirname(os.path.abspath(__file__)),
+        #         "Spinning_disk_volumes.txt",
+        #     )
+        # )
+
         self.volumes = np.loadtxt(
             os.path.join(
                 os.path.dirname(os.path.abspath(__file__)),
-                "Spinning_disk_volumes.txt",
-            )
+                "volumes_8.csv",
+            ),
+            delimiter=",",
+            # skiprows=1,
+            # usecols=list(range(1, 55)),
         )
         self.volumes = vol_factor * self.volumes
-        # self.volumes = vol_factor * (np.tile(self.volumes, data.shape[0])).reshape(
-        #     data.shape[0], 8
-        # )
 
         self.temperatures = np.ones((data.shape[0], 8))
 
@@ -370,28 +423,45 @@ class TestCSEModelPennyShapedFlaw(unittest.TestCase):
 class TestSMMModelGriffithFlaw(unittest.TestCase):
     def setUp(self):
         # data = np.loadtxt("Spinning_disk_cyclic_60000_70000.txt")
+        # data = np.loadtxt(
+        #     os.path.join(
+        #         os.path.dirname(os.path.abspath(__file__)),
+        #         "Spinning_disk_cyclic_60000_70000.txt",
+        #         # "Spinning_disk_cyclic_60000_80000.txt",
+        #     )
+        # )
+        # data = np.loadtxt("Spinning_disk_static_60000.txt")
         data = np.loadtxt(
             os.path.join(
                 os.path.dirname(os.path.abspath(__file__)),
-                "Spinning_disk_cyclic_60000_70000.txt",
-                # "Spinning_disk_cyclic_60000_80000.txt",
-            )
+                # "Spinning_disk_60k_70k.csv",
+                "Spinning_disk_60k_80k.csv",
+            ),
+            delimiter=",",
+            skiprows=1,
+            usecols=list(range(1, 49)),
         )
-        # data = np.loadtxt("Spinning_disk_static_60000.txt")
 
         self.stress = data.reshape(data.shape[0], 8, -1)
 
-        vol_factor = 1
+        vol_factor = 360 / 15
+        # self.volumes = np.loadtxt(
+        #     os.path.join(
+        #         os.path.dirname(os.path.abspath(__file__)),
+        #         "Spinning_disk_volumes.txt",
+        #     )
+        # )
+
         self.volumes = np.loadtxt(
             os.path.join(
                 os.path.dirname(os.path.abspath(__file__)),
-                "Spinning_disk_volumes.txt",
-            )
+                "volumes_8.csv",
+            ),
+            delimiter=",",
+            # skiprows=1,
+            # usecols=list(range(1, 55)),
         )
         self.volumes = vol_factor * self.volumes
-        # self.volumes = vol_factor * (np.tile(self.volumes, data.shape[0])).reshape(
-        #     data.shape[0], 8
-        # )
 
         self.temperatures = np.ones((data.shape[0], 8))
 
@@ -451,33 +521,50 @@ class TestSMMModelGriffithFlaw(unittest.TestCase):
 class TestSMMModelPennyShapedFlaw(unittest.TestCase):
     def setUp(self):
         # data = np.loadtxt("Spinning_disk_cyclic_60000_70000.txt")
+        # data = np.loadtxt(
+        #     os.path.join(
+        #         os.path.dirname(os.path.abspath(__file__)),
+        #         "Spinning_disk_cyclic_60000_70000.txt",
+        #         # "Spinning_disk_cyclic_60000_80000.txt",
+        #     )
+        # )
+        # data = np.loadtxt("Spinning_disk_static_60000.txt")
         data = np.loadtxt(
             os.path.join(
                 os.path.dirname(os.path.abspath(__file__)),
-                "Spinning_disk_cyclic_60000_70000.txt",
-                # "Spinning_disk_cyclic_60000_80000.txt",
-            )
+                # "Spinning_disk_60k_70k.csv",
+                "Spinning_disk_60k_80k.csv",
+            ),
+            delimiter=",",
+            skiprows=1,
+            usecols=list(range(1, 49)),
         )
-        # data = np.loadtxt("Spinning_disk_static_60000.txt")
 
         self.stress = data.reshape(data.shape[0], 8, -1)
 
-        vol_factor = 1
+        vol_factor = 360 / 15
+        # self.volumes = np.loadtxt(
+        #     os.path.join(
+        #         os.path.dirname(os.path.abspath(__file__)),
+        #         "Spinning_disk_volumes.txt",
+        #     )
+        # )
+
         self.volumes = np.loadtxt(
             os.path.join(
                 os.path.dirname(os.path.abspath(__file__)),
-                "Spinning_disk_volumes.txt",
-            )
+                "volumes_8.csv",
+            ),
+            delimiter=",",
+            # skiprows=1,
+            # usecols=list(range(1, 55)),
         )
         self.volumes = vol_factor * self.volumes
-        # self.volumes = vol_factor * (np.tile(self.volumes, data.shape[0])).reshape(
-        #     data.shape[0], 8
-        # )
 
         self.temperatures = np.ones((data.shape[0], 8))
 
         # Number of cycles to failure
-        self.nf = 1
+        self.nf = 100000
         self.period = 0.01
         self.time = np.linspace(0, self.period, self.stress.shape[0])
 
