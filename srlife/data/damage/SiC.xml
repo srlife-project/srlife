@@ -25,13 +25,13 @@
     </modulus>
     <c_bar>0.82</c_bar>
     <nu>0.16</nu>
-    <fatigue_Nv>
+    <Nv>
       <temperatures>298.15 811.15 1089.15 1366.15</temperatures>
       <values>56 56 47 38</values>
-    </fatigue_Nv>
-    <fatigue_Bv>
+    </Nv>
+    <Bv>
       <temperatures>298.15 811.15 1089.15 1366.15</temperatures>
       <values>1275 1275 1850 520</values>
-    </fatigue_Bv>
+    </Bv>
   </cares>
 </models>
