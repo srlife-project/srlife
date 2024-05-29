@@ -4,9 +4,8 @@
 """
 import xml.etree.ElementTree as ET
 
-from jax.config import config
-
-config.update("jax_enable_x64", True)
+import jax
+jax.config.update("jax_enable_x64", True)
 import jax.numpy as jnp
 
 from srlife import materials
