@@ -3,13 +3,12 @@
 #
 sphinx
 sphinxcontrib-napoleon
-numpy==1.18
-scipy
+numpy
+scipy==1.9.2
 h5py
 vtk
 nose
 matplotlib
-pylint
 neml
 scikit-fem
 meshio
@@ -18,3 +17,5 @@ tqdm
 multiprocess
 dill
 parameterized
+jax[cpu]
+absl-py
