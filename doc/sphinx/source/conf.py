@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.abspath('..')) # ???
 # -- Project information -----------------------------------------------------
 
 project = 'srlife'
-copyright = '2022, Argonne National Laboratory'
+copyright = '2024, Argonne National Laboratory'
 author = 'Argonne National Laboratory'
 
 # The full version, including alpha/beta/rc tags
@@ -34,7 +34,7 @@ release = '2.0.1'
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
-    'sphinxcontrib.napoleon',
+    'sphinx.ext.napoleon',
     'sphinx.ext.todo'
 ]
 

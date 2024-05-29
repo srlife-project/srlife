@@ -2,7 +2,6 @@
 ##### pip requirements ######
 #
 sphinx
-sphinxcontrib-napoleon
 numpy
 scipy==1.9.2
 h5py
