@@ -86,7 +86,7 @@ class TestPIAModel(unittest.TestCase):
         surface_area2 = np.concatenate((surface_area2[0,:,:],surface_area2[-1,:,:]))
     
         self.stress = data.reshape(data.shape[0], 8, -1)
-
+   
         vol_factor = 360 / 15
 
         self.volumes = np.loadtxt(
@@ -107,6 +107,8 @@ class TestPIAModel(unittest.TestCase):
         self.time = np.linspace(0, self.period, self.stress.shape[0])
 
         # Material properties
+        self.su_v = 0
+        self.su_s = 0
         self.m_v = 7.65
         self.m_s = 7.65
         # Volume scale parameter in mm  74.79 in m
@@ -121,6 +123,9 @@ class TestPIAModel(unittest.TestCase):
         self.Bs = 320
 
         self.material = materials.StandardCeramicMaterial(
+            np.array([0, 1000.0]),
+            np.array([self.su_v,self.su_v]),
+            np.array([self.su_s,self.su_s]),
             np.array([0, 1000.0]),
             np.array([self.s0_v, self.s0_v]),
             np.array([self.s0_s, self.s0_s]),
@@ -255,6 +260,8 @@ class TestWNTSAModel(unittest.TestCase):
         self.time = np.linspace(0, self.period, self.stress.shape[0])
 
         # Material properties
+        self.su_v = 0
+        self.su_s = 0
         self.m_v = 7.65
         self.m_s = 7.65
         # Volume scale parameter in mm  74.79 in m
@@ -269,6 +276,9 @@ class TestWNTSAModel(unittest.TestCase):
         self.Bs = 320
 
         self.material = materials.StandardCeramicMaterial(
+            np.array([0, 1000.0]),
+            np.array([self.su_v,self.su_v]),
+            np.array([self.su_s,self.su_s]),
             np.array([0, 1000.0]),
             np.array([self.s0_v, self.s0_v]),
             np.array([self.s0_s, self.s0_s]),
@@ -403,6 +413,8 @@ class TestMTSModelGriffithFlaw(unittest.TestCase):
         self.time = np.linspace(0, self.period, self.stress.shape[0])
 
         # Material properties
+        self.su_v = 0
+        self.su_s = 0
         self.m_v = 7.65
         self.m_s = 7.65
         # Volume scale parameter in mm  74.79 in m
@@ -417,6 +429,9 @@ class TestMTSModelGriffithFlaw(unittest.TestCase):
         self.Bs = 320
 
         self.material = materials.StandardCeramicMaterial(
+            np.array([0, 1000.0]),
+            np.array([self.su_v,self.su_v]),
+            np.array([self.su_s,self.su_s]),
             np.array([0, 1000.0]),
             np.array([self.s0_v, self.s0_v]),
             np.array([self.s0_s, self.s0_s]),
@@ -552,6 +567,8 @@ class TestMTSModelPennyShapedFlaw(unittest.TestCase):
         self.time = np.linspace(0, self.period, self.stress.shape[0])
 
         # Material properties
+        self.su_v = 0
+        self.su_s = 0
         self.m_v = 7.65
         self.m_s = 7.65
         # Volume scale parameter in mm  74.79 in m
@@ -566,6 +583,9 @@ class TestMTSModelPennyShapedFlaw(unittest.TestCase):
         self.Bs = 320
 
         self.material = materials.StandardCeramicMaterial(
+            np.array([0, 1000.0]),
+            np.array([self.su_v,self.su_v]),
+            np.array([self.su_s,self.su_s]),
             np.array([0, 1000.0]),
             np.array([self.s0_v, self.s0_v]),
             np.array([self.s0_s, self.s0_s]),
@@ -700,6 +720,8 @@ class TestCSEModelGriffithFlaw(unittest.TestCase):
         self.time = np.linspace(0, self.period, self.stress.shape[0])
 
         # Material properties
+        self.su_v = 0
+        self.su_s = 0
         self.m_v = 7.65
         self.m_s = 7.65
         # Volume scale parameter in mm  74.79 in m
@@ -714,6 +736,9 @@ class TestCSEModelGriffithFlaw(unittest.TestCase):
         self.Bs = 320
 
         self.material = materials.StandardCeramicMaterial(
+            np.array([0, 1000.0]),
+            np.array([self.su_v,self.su_v]),
+            np.array([self.su_s,self.su_s]),
             np.array([0, 1000.0]),
             np.array([self.s0_v, self.s0_v]),
             np.array([self.s0_s, self.s0_s]),
@@ -849,6 +874,8 @@ class TestCSEModelPennyShapedFlaw(unittest.TestCase):
         self.time = np.linspace(0, self.period, self.stress.shape[0])
 
         # Material properties
+        self.su_v = 0
+        self.su_s = 0
         self.m_v = 7.65
         self.m_s = 7.65
         # Volume scale parameter in mm  74.79 in m
@@ -863,6 +890,9 @@ class TestCSEModelPennyShapedFlaw(unittest.TestCase):
         self.Bs = 320
 
         self.material = materials.StandardCeramicMaterial(
+            np.array([0, 1000.0]),
+            np.array([self.su_v,self.su_v]),
+            np.array([self.su_s,self.su_s]),
             np.array([0, 1000.0]),
             np.array([self.s0_v, self.s0_v]),
             np.array([self.s0_s, self.s0_s]),
@@ -998,6 +1028,8 @@ class TestCSEModelGriffithNotch(unittest.TestCase):
         self.time = np.linspace(0, self.period, self.stress.shape[0])
 
         # Material properties
+        self.su_v = 0
+        self.su_s = 0
         self.m_v = 7.65
         self.m_s = 7.65
         # Volume scale parameter in mm  74.79 in m
@@ -1012,6 +1044,9 @@ class TestCSEModelGriffithNotch(unittest.TestCase):
         self.Bs = 320
 
         self.material = materials.StandardCeramicMaterial(
+            np.array([0, 1000.0]),
+            np.array([self.su_v,self.su_v]),
+            np.array([self.su_s,self.su_s]),
             np.array([0, 1000.0]),
             np.array([self.s0_v, self.s0_v]),
             np.array([self.s0_s, self.s0_s]),
@@ -1147,6 +1182,8 @@ class TestSMMModelGriffithFlaw(unittest.TestCase):
         self.time = np.linspace(0, self.period, self.stress.shape[0])
 
         # Material properties
+        self.su_v = 0
+        self.su_s = 0
         self.m_v = 7.65
         self.m_s = 7.65
         # Volume scale parameter in mm  74.79 in m
@@ -1161,6 +1198,9 @@ class TestSMMModelGriffithFlaw(unittest.TestCase):
         self.Bs = 320
 
         self.material = materials.StandardCeramicMaterial(
+            np.array([0, 1000.0]),
+            np.array([self.su_v,self.su_v]),
+            np.array([self.su_s,self.su_s]),
             np.array([0, 1000.0]),
             np.array([self.s0_v, self.s0_v]),
             np.array([self.s0_s, self.s0_s]),
@@ -1296,6 +1336,8 @@ class TestSMMModelGriffithNotch(unittest.TestCase):
         self.time = np.linspace(0, self.period, self.stress.shape[0])
 
         # Material properties
+        self.su_v = 0
+        self.su_s = 0
         self.m_v = 7.65
         self.m_s = 7.65
         # Volume scale parameter in mm  74.79 in m
@@ -1310,6 +1352,9 @@ class TestSMMModelGriffithNotch(unittest.TestCase):
         self.Bs = 320
 
         self.material = materials.StandardCeramicMaterial(
+            np.array([0, 1000.0]),
+            np.array([self.su_v,self.su_v]),
+            np.array([self.su_s,self.su_s]),
             np.array([0, 1000.0]),
             np.array([self.s0_v, self.s0_v]),
             np.array([self.s0_s, self.s0_s]),
@@ -1445,6 +1490,8 @@ class TestSMMModelPennyShapedFlaw(unittest.TestCase):
         self.time = np.linspace(0, self.period, self.stress.shape[0])
 
         # Material properties
+        self.su_v = 0
+        self.su_s = 0
         self.m_v = 7.65
         self.m_s = 7.65
         # Volume scale parameter in mm  74.79 in m
@@ -1459,6 +1506,9 @@ class TestSMMModelPennyShapedFlaw(unittest.TestCase):
         self.Bs = 320
 
         self.material = materials.StandardCeramicMaterial(
+            np.array([0, 1000.0]),
+            np.array([self.su_v,self.su_v]),
+            np.array([self.su_s,self.su_s]),
             np.array([0, 1000.0]),
             np.array([self.s0_v, self.s0_v]),
             np.array([self.s0_s, self.s0_s]),
@@ -1594,6 +1644,8 @@ class TestSMMModelSemiCircularCrack(unittest.TestCase):
         self.time = np.linspace(0, self.period, self.stress.shape[0])
 
         # Material properties
+        self.su_v = 0
+        self.su_s = 0
         self.m_v = 7.65
         self.m_s = 7.65
         # Volume scale parameter in mm  74.79 in m
@@ -1608,6 +1660,9 @@ class TestSMMModelSemiCircularCrack(unittest.TestCase):
         self.Bs = 320
 
         self.material = materials.StandardCeramicMaterial(
+            np.array([0, 1000.0]),
+            np.array([self.su_v,self.su_v]),
+            np.array([self.su_s,self.su_s]),
             np.array([0, 1000.0]),
             np.array([self.s0_v, self.s0_v]),
             np.array([self.s0_s, self.s0_s]),
