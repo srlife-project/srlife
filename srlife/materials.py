@@ -763,7 +763,7 @@ class StandardCeramicMaterial:
         Weibull threshold parameter for volume flaws as a function of temperature
         """
         return self.su_v(T)
-    
+
     def threshold_surf(self, T):
         """
         Weibull threshold parameter for surface flaws as a function of temperature
