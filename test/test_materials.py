@@ -243,6 +243,8 @@ class TestStructuralMaterial(unittest.TestCase):
 class TestStandardCeramicMaterial(unittest.TestCase):
     def setUp(self):
         self.Ts = np.array([25.0, 800.0, 1000.0, 1200.0, 1400.0, 1500.0])
+        self.su_v = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0 ])
+        self.su_s = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0 ])
         self.s0s_v = np.array([507.0, 467.0, 528.0, 570.0, 746.0, 461.0])
         self.s0s_s = np.array([507.0, 467.0, 528.0, 570.0, 746.0, 461.0])
         self.mTs = np.array([25.0, 1500.0])
@@ -259,6 +261,8 @@ class TestStandardCeramicMaterial(unittest.TestCase):
 
         self.mat = materials.StandardCeramicMaterial(
             self.Ts,
+            self.su_v,
+            self.su_s,
             self.s0s_v,
             self.s0s_s,
             self.mTs,
@@ -273,6 +277,24 @@ class TestStandardCeramicMaterial(unittest.TestCase):
             self.Bvs,
             self.Bss,
         )
+
+    def test_threshold_vol(self):
+        ifn = inter.interp1d(self.Ts, self.su_v)
+        T = 1099.1
+
+        a = self.mat.threshold_vol(T)
+        b = ifn(T)
+
+        self.assertAlmostEqual(a, b)
+
+    def test_threshold_surf(self):
+        ifn = inter.interp1d(self.Ts, self.su_s)
+        T = 1099.1
+
+        a = self.mat.threshold_surf(T)
+        b = ifn(T)
+
+        self.assertAlmostEqual(a, b)
 
     def test_strength_vol(self):
         ifn = inter.interp1d(self.Ts, self.s0s_v)
@@ -365,6 +387,10 @@ class TestStandardCeramicMaterial(unittest.TestCase):
         tfile = tempfile.mktemp()
         self.mat.save(tfile, "blah")
         test = materials.CeramicMaterial.load(tfile, "blah")
+
+        self.assertTrue(np.allclose(test.s_temperatures, self.Ts))
+        self.assertTrue(np.allclose(test.threshold_v, self.su_v))
+        self.assertTrue(np.allclose(test.threshold_s, self.su_s))
 
         self.assertTrue(np.allclose(test.s_temperatures, self.Ts))
         self.assertTrue(np.allclose(test.strengths_v, self.s0s_v))
