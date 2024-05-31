@@ -919,8 +919,6 @@ class StandardCeramicMaterial:
 
         # Surface flaw properties
         threshold_s = ET.SubElement(base, "threshold_surf")
-        su_temps = ET.SubElement(threshold_s, "temperatures")
-        su_temps.text = " ".join(map(str, self.su_temperatures))
         thresholds_s = ET.SubElement(threshold_s, "values")
         thresholds_s.text = " ".join(map(str, self.thresholds_s))
 

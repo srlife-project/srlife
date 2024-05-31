@@ -281,7 +281,7 @@ class TestStandardCeramicMaterial(unittest.TestCase):
         )
 
     def test_threshold_vol(self):
-        ifn = inter.interp1d(self.Ts, self.su_v)
+        ifn = inter.interp1d(self.suTs, self.su_v)
         T = 1099.1
 
         a = self.mat.threshold_vol(T)
@@ -290,7 +290,7 @@ class TestStandardCeramicMaterial(unittest.TestCase):
         self.assertAlmostEqual(a, b)
 
     def test_threshold_surf(self):
-        ifn = inter.interp1d(self.Ts, self.su_s)
+        ifn = inter.interp1d(self.suTs, self.su_s)
         T = 1099.1
 
         a = self.mat.threshold_surf(T)
@@ -299,7 +299,7 @@ class TestStandardCeramicMaterial(unittest.TestCase):
         self.assertAlmostEqual(a, b)
 
     def test_strength_vol(self):
-        ifn = inter.interp1d(self.Ts, self.s0s_v)
+        ifn = inter.interp1d(self.s0Ts, self.s0s_v)
         T = 1099.1
 
         a = self.mat.strength_vol(T)
@@ -308,7 +308,7 @@ class TestStandardCeramicMaterial(unittest.TestCase):
         self.assertAlmostEqual(a, b)
     
     def test_strength_surf(self):
-        ifn = inter.interp1d(self.Ts, self.s0s_s)
+        ifn = inter.interp1d(self.s0Ts, self.s0s_s)
         T = 1099.1
 
         a = self.mat.strength_surf(T)
