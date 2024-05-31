@@ -709,8 +709,8 @@ class StandardCeramicMaterial:
     def __init__(
         self,
         su_temperatures,
-        threshold_v,
-        threshold_s,
+        thresholds_v,
+        thresholds_s,
         s_temperatures,
         strengths_v,
         strengths_s,
@@ -731,10 +731,10 @@ class StandardCeramicMaterial:
         super().__init__(*args, **kwargs)
 
         self.su_temperatures = su_temperatures
-        self.threhold_v = threshold_v
-        self.threhold_s = threshold_s
-        self.su_v = inter.interp1d(s_temperatures, threshold_v)
-        self.su_s = inter.interp1d(s_temperatures, threshold_s)
+        self.thresholds_v = thresholds_v
+        self.thresholds_s = thresholds_s
+        self.su_v = inter.interp1d(s_temperatures, thresholds_v)
+        self.su_s = inter.interp1d(s_temperatures, thresholds_s)
         self.s_temperatures = s_temperatures
         self.strengths_v = strengths_v
         self.strengths_s = strengths_s
@@ -914,15 +914,15 @@ class StandardCeramicMaterial:
         threshold_v = ET.SubElement(base, "threshold_vol")
         su_temps = ET.SubElement(threshold_v, "temperatures")
         su_temps.text = " ".join(map(str, self.su_temperatures))
-        threshold_v = ET.SubElement(threshold_v, "values")
-        threshold_v.text = " ".join(map(str, self.threshold_v))
+        thresholds_v = ET.SubElement(threshold_v, "values")
+        thresholds_v.text = " ".join(map(str, self.thresholds_v))
 
         # Surface flaw properties
         threshold_s = ET.SubElement(base, "threshold_surf")
         su_temps = ET.SubElement(threshold_s, "temperatures")
         su_temps.text = " ".join(map(str, self.su_temperatures))
-        threshold_s = ET.SubElement(threshold_s, "values")
-        threshold_s.text = " ".join(map(str, self.threshold_s))
+        thresholds_s = ET.SubElement(threshold_s, "values")
+        thresholds_s.text = " ".join(map(str, self.thresholds_s))
 
         # Volume flaw properties
         strength_v = ET.SubElement(base, "strength_vol")

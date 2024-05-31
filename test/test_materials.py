@@ -391,8 +391,8 @@ class TestStandardCeramicMaterial(unittest.TestCase):
         test = materials.CeramicMaterial.load(tfile, "blah")
 
         self.assertTrue(np.allclose(test.su_temperatures, self.suTs))
-        self.assertTrue(np.allclose(test.threshold_v, self.su_v))
-        self.assertTrue(np.allclose(test.threshold_s, self.su_s))
+        self.assertTrue(np.allclose(test.thresholds_v, self.su_v))
+        self.assertTrue(np.allclose(test.thresholds_s, self.su_s))
 
         self.assertTrue(np.allclose(test.s_temperatures, self.s0Ts))
         self.assertTrue(np.allclose(test.strengths_v, self.s0s_v))
