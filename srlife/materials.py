@@ -911,6 +911,20 @@ class StandardCeramicMaterial:
         base = ET.SubElement(root, modelname, {"type": "StandardModel"})
 
         # Volume flaw properties
+        threshold_v = ET.SubElement(base, "threshold_vol")
+        su_temps = ET.SubElement(threshold_v, "temperatures")
+        su_temps.text = " ".join(map(str, self.su_temperatures))
+        threshold_v = ET.SubElement(threshold_v, "values")
+        threshold_v.text = " ".join(map(str, self.threshold_v))
+
+        # Surface flaw properties
+        threshold_s = ET.SubElement(base, "threshold_surf")
+        su_temps = ET.SubElement(threshold_s, "temperatures")
+        su_temps.text = " ".join(map(str, self.su_temperatures))
+        threshold_s = ET.SubElement(threshold_s, "values")
+        threshold_s.text = " ".join(map(str, self.threshold_s))
+
+        # Volume flaw properties
         strength_v = ET.SubElement(base, "strength_vol")
         s_temps = ET.SubElement(strength_v, "temperatures")
         s_temps.text = " ".join(map(str, self.s_temperatures))
