@@ -1486,7 +1486,7 @@ class PIAModel(CrackShapeIndependent):
 
         return log_reliability
 
-    def calculate_surface_flaw_element_log_reliability(
+    def calculate_surface_time_dep_pstress(
         self,
         time,
         mandel_stress,
@@ -1567,6 +1567,72 @@ class PIAModel(CrackShapeIndependent):
         surf_pstress_0 -= suavg[..., None, None]
         surf_pstress_0[surf_pstress_0 < 0] = 0
 
+        # # Summing up over last two axes i.e. over the elements of surface stress and
+        # # surfaces for which normals are there
+
+        # # Log reliability in each element
+        # log_reliability = (
+        #     -kavg
+        #     * np.sum(surf_pstress_0 ** mavg[..., None, None], axis=(-1, -2))
+        #     * surface_areas
+        # )
+
+        return surf_pstress_0
+    
+    def calculate_surface_flaw_element_log_reliability(
+        self,
+        time,
+        mandel_stress,
+        surface,
+        normals,
+        temperatures,
+        surface_areas,
+        material,
+        tot_time,
+    ):
+        """
+        Calculate the element log reliability from surface elements only
+
+        Parameters:
+          time:             time instance variable for each stress/temperature
+          mandel_stress:    element stresses in Mandel convention
+          temperatures:     element temperatures
+          volumes:          element volumes
+          material:         material model object with required data that includes
+                            Weibull scale parameter (svals), Weibull modulus (mvals)
+                            and fatigue parameters (Bv,Nv)
+          tot_time:         total service time used as input to calculate reliability
+          surface_normals:  np.array of surface normals (zeros for solids)
+          surface_elements: logical indexing array, True if on surface
+        """
+
+        # Material parameters
+        # suvals = material.threshold_surf(temperatures)
+        svals = material.strength_surf(temperatures)
+        mvals = material.modulus_surf(temperatures)
+        kvals = svals ** (-mvals)
+        # N = material.Ns(temperatures)
+        # B = material.Bs(temperatures)
+
+        # Count number of surface elements
+        count_surface_elements = np.count_nonzero(surface)
+
+        # Temperature average values
+        # suavg = np.mean(suvals, axis=0)[:count_surface_elements]
+        mavg = np.mean(mvals, axis=0)[:count_surface_elements]
+        kavg = np.mean(kvals, axis=0)[:count_surface_elements]
+        # Navg = np.mean(N, axis=0)[:count_surface_elements]
+        # Bavg = np.mean(B, axis=0)[:count_surface_elements]
+
+        # Principal stresses in surface elements
+        surf_pstress = self.calculate_surface_principal_stress(
+            mandel_stress, surface, normals
+        )
+
+        surf_pstress_0 = self.calculate_surface_time_dep_pstress(
+            time, mandel_stress, surface, normals, temperatures, surface_areas, material, tot_time,
+        )
+
         # Summing up over last two axes i.e. over the elements of surface stress and
         # surfaces for which normals are there
 
@@ -1578,6 +1644,7 @@ class PIAModel(CrackShapeIndependent):
         )
 
         return log_reliability
+    
 
 
 class WNTSAModel(CrackShapeIndependent):
