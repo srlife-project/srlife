@@ -867,7 +867,7 @@ class CrackShapeDependent(WeibullFailureModel):
         sigma = self.calculate_volume_flaw_total_stress(mandel_stress)
 
         # Shear stress
-        shear_stress = np.sqrt(sigma**2 - sigma_n**2)
+        shear_stress = np.sqrt(np.maximum(sigma**2 - sigma_n**2,0.0))
 
         return shear_stress
 
@@ -917,7 +917,7 @@ class CrackShapeDependent(WeibullFailureModel):
         )
 
         # Shear stress
-        shear_stress = np.sqrt(sigma**2 - sigma_n**2)
+        shear_stress = np.sqrt(np.maximum(sigma**2 - sigma_n**2,0.0))
 
         return shear_stress
 
@@ -1759,7 +1759,7 @@ class WNTSAModel(CrackShapeIndependent):
 
         return sigma_avg
 
-    def calculate_surface_flaw_time_dep_normal_stress(
+    def calculate_surface_flaw_avg_normal_stress(
         self,
         time,
         mandel_stress,
@@ -1900,40 +1900,6 @@ class WNTSAModel(CrackShapeIndependent):
 
         integral = ((sigma_n_0 ** mavg[..., None, None, None]) * self.ddelta) / (
             2 * np.pi
-        )
-
-        return integral
-    
-    def calculate_surface_flaw_avg_normal_stress(
-        self,
-        time,
-        mandel_stress,
-        surface_elements,
-        surface_normals,
-        temperatures,
-        material,
-        tot_time,
-    ):
-        """
-        Calculate the average normal tensile stresses from the pricipal stresses
-
-        Parameters:
-          mandel_stress:  element stresses in Mandel convention
-          temperatures:   element temperatures
-          material:       material model object with required data that includes
-                          Weibull scale parameter (svals), Weibull modulus (mvals)
-                          and fatigue parameters (Bv,Nv)
-          tot_time:       total service time used as input to calculate reliability
-        """
-
-        integral = self.calculate_surface_flaw_time_dep_normal_stress(
-            time,
-            mandel_stress,
-            surface_elements,
-            surface_normals,
-            temperatures,
-            material,
-            tot_time,
         )
 
         # Flatten the last axis and calculate the mean of the positive values along that axis
