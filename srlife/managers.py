@@ -320,10 +320,6 @@ class Heuristic:
         Args:
           receiver (receiver.receiver):       receiver object affected
           tube (receiver.tube):               tube object affected
-        """
-        resetter = thermal.TemperatureResetter(
-            lambda t: np.isclose(t % receiver.period, 0), tube.T0
-        )
 
     To implement a specific heuristic override the appropriate pure virtual
     methods.

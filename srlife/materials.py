@@ -846,23 +846,29 @@ class StandardCeramicMaterial:
         """
 
         def extract_data_from_node(node, subnode_ids):
-            return [
-                np.array(list(map(float, node.find(subnode_ids).text.strip().split())))
-                for subnode_id in subnode_ids
-            ]
+            
+            result = []
 
-        (
-            threshold_v,
-            threshold_s,
-            strength_v,
-            strength_s,
-            m_v,
-            m_s,
-            Nv,
-            Ns,
-            Bv,
-            Bs,
-        ) = extract_data_from_node(
+            for subnode_id in subnode_ids:
+                subnode = node.find(subnode_id) 
+                if subnode is None:      
+                    raise ValueError(f"Subnode '{subnode_id}' not found in the XML") 
+                else:
+                    data = subnode.text
+                    if data is not None: 
+                        converted_data = np.array(list(map(float, data.strip().split()))) 
+                        result.append(converted_data)
+                
+            # return [
+            #     np.array(list(map(float, node.find(subnode_id).text.strip().split())))
+            #     for subnode_id in subnode_ids
+            # ]
+
+        threshold_v, threshold_s, \
+        strength_v, strength_s, \
+        m_v, m_s, \
+        Nv, Ns, \
+        Bv, Bs = extract_data_from_node(
             node,
             [
                 "threshold_vol",

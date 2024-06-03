@@ -75,7 +75,6 @@ class WeibullFailureModel:
 
         pstress = la.eigvalsh(tensor)
 
-        # IS PAGING REQUIRED HERE?
         if self.cares_cutoff:
             pmax = np.max(pstress, axis=2)
             pmin = np.min(pstress, axis=2)
@@ -1975,6 +1974,10 @@ class WNTSAModel(CrackShapeIndependent):
             )
 
         else:
+            sigma_n = np.zeros(
+                surf_pstress.shape[:3] + (1, 31),
+            )
+            sigma_n_max = np.zeros(sigma_n.shape[1:])
             g = np.zeros(sigma_n_max.shape)
             sigma_n_0 = np.zeros(g.shape)
             integral = np.zeros(sigma_n_0.shape)
