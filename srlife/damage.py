@@ -1515,7 +1515,6 @@ class PIAModel(CrackShapeIndependent):
 
         # Material parameters
         suvals = material.threshold_surf(temperatures)
-        svals = material.strength_surf(temperatures)
         N = material.Ns(temperatures)
         B = material.Bs(temperatures)
 
@@ -1759,7 +1758,7 @@ class WNTSAModel(CrackShapeIndependent):
 
         return sigma_avg
 
-    def calculate_surface_flaw_avg_normal_stress(
+    def calculate_surface_flaw_max_normal_stress(
         self,
         time,
         mandel_stress,
@@ -1798,11 +1797,6 @@ class WNTSAModel(CrackShapeIndependent):
         # Count number of surface elements
         count_surface_elements = np.count_nonzero(surface)
 
-        # Temperature average values
-        suavg = np.mean(suvals, axis=0)[:count_surface_elements]
-        mavg = np.mean(mvals, axis=0)[:count_surface_elements]
-        Navg = np.mean(N, axis=0)[:count_surface_elements]
-        Bavg = np.mean(B, axis=0)[:count_surface_elements]
 
         # Principal stresses in surface elements
         surf_pstress = self.calculate_surface_principal_stress(
@@ -1868,6 +1862,145 @@ class WNTSAModel(CrackShapeIndependent):
 
         # Max normal stresss over all time steps for each element
         sigma_n_max = np.max(sigma_n, axis=0)
+
+        # # Calculating ratio of cyclic stress to max cyclic stress (in one cycle)
+        # # for time-independent and time-dependent cases
+
+        # if np.all(time == 0):
+        #     sigma_n_0 = sigma_n
+        # else:
+        #     g = (
+        #         np.trapz(
+        #             (sigma_n / (sigma_n_max + self.tolerance))
+        #             ** Navg[..., None, None, None],
+        #             time,
+        #             axis=0,
+        #         )
+        #         / time[-1]
+        #     )
+
+        #     # Time dependent equivalent stress
+        #     sigma_n_0 = (
+        #         (
+        #             ((sigma_n_max ** Navg[..., None, None, None]) * g * tot_time)
+        #             / Bavg[..., None, None, None]
+        #         )
+        #         + (sigma_n_max ** (Navg[..., None, None, None] - 2))
+        #     ) ** (1 / (Navg[..., None, None, None] - 2))
+
+        #     # Subtracting threshold stress
+        #     sigma_n_0 -= suavg[..., None, None, None]
+        #     sigma_n_0[sigma_n_0 < 0] = 0
+
+        # integral = ((sigma_n_0 ** mavg[..., None, None, None]) * self.ddelta) / (
+        #     2 * np.pi
+        # )
+
+        # # Flatten the last axis and calculate the mean of the positive values along that axis
+        # flat = integral.reshape(integral.shape[:-2] + (-1,))
+
+        # # Average stress from summing while ignoring NaN values
+        # sigma_avg = np.nansum(np.where(flat >= 0.0, flat, np.nan), axis=(-1, -2))
+
+        return sigma_n_max
+    
+    def calculate_surface_flaw_avg_normal_stress(
+        self,
+        time,
+        mandel_stress,
+        surface_elements,
+        surface_normals,
+        temperatures,
+        material,
+        tot_time,
+    ):
+        """
+        Calculate the average normal tensile stresses from the pricipal stresses
+
+        Parameters:
+          mandel_stress:  element stresses in Mandel convention
+          temperatures:   element temperatures
+          material:       material model object with required data that includes
+                          Weibull scale parameter (svals), Weibull modulus (mvals)
+                          and fatigue parameters (Bv,Nv)
+          tot_time:       total service time used as input to calculate reliability
+        """
+
+        # Material parameters
+        self.temperatures = temperatures
+        self.material = material
+        self.mandel_stress = mandel_stress
+
+        suvals = material.threshold_surf(temperatures)
+        mvals = material.modulus_surf(temperatures)
+        N = material.Ns(temperatures)
+        B = material.Bs(temperatures)
+
+        # Surface normals and surface elements
+        normals = surface_normals
+        surface = surface_elements
+
+        # Count number of surface elements
+        count_surface_elements = np.count_nonzero(surface)
+
+        # Temperature average values
+        suavg = np.mean(suvals, axis=0)[:count_surface_elements]
+        mavg = np.mean(mvals, axis=0)[:count_surface_elements]
+        Navg = np.mean(N, axis=0)[:count_surface_elements]
+        Bavg = np.mean(B, axis=0)[:count_surface_elements]
+
+        # Paging arrays
+        if self.page:
+            g = np.memmap(
+                "paged_g" + ".dat",
+                dtype=np.float64,
+                mode="w+",
+                shape=sigma_n_max.shape,
+            )
+            sigma_n_0 = np.memmap(
+                "paged_sigma_n_0" + ".dat",
+                dtype=np.float64,
+                mode="w+",
+                shape=g.shape,
+            )
+            integral = np.memmap(
+                "paged_integral" + ".dat",
+                dtype=np.float64,
+                mode="w+",
+                shape=sigma_n_0.shape,
+            )
+            flat = np.memmap(
+                "paged_flat" + ".dat",
+                dtype=np.float64,
+                mode="w+",
+                shape=(integral.reshape(integral.shape[:-2] + (-1,))).shape,
+            )
+
+        else:
+            g = np.zeros(sigma_n_max.shape)
+            sigma_n_0 = np.zeros(g.shape)
+            integral = np.zeros(sigma_n_0.shape)
+            flat = np.zeros((integral.reshape(integral.shape[:-2] + (-1,))).shape)
+
+
+        # Time dependent Normal stress
+        sigma_n = self.calculate_surface_flaw_normal_stress(
+            mandel_stress, surface, normals
+        )
+
+        # Considering only tensile stresses
+        sigma_n[sigma_n < 0] = 0
+
+        # Max normal stresss over all time steps for each element
+        sigma_n_max = self.calculate_surface_flaw_max_normal_stress(
+        time,
+        mandel_stress,
+        surface_elements,
+        surface_normals,
+        temperatures,
+        material,
+        tot_time,
+         )
 
         # Calculating ratio of cyclic stress to max cyclic stress (in one cycle)
         # for time-independent and time-dependent cases
