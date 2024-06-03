@@ -586,7 +586,7 @@ class Tube:
             raise ValueError("Internal error: tube dimension is %i" % self.ndim)
 
         return surface, normals
-    
+
     def element_surface_areas(self):
         """Calculate the element surface areas
 
@@ -600,13 +600,13 @@ class Tube:
         elif self.ndim == 3:
             return self._surfacearea3d()
         else:
-            raise ValueError("Internal error: tube dimension is %i" % self.ndim)        
+            raise ValueError("Internal error: tube dimension is %i" % self.ndim)
 
     def _surfacearea1d(self):
         """
         1D surface area calculator
         """
-        # Discretizing along radial direction 
+        # Discretizing along radial direction
         r = np.linspace(self.r - self.t, self.r, self.nr)
         surface_area = np.zeros(self.nr - 1)
         surface_area[0] = 2 * np.pi * r[0] * self.h
@@ -620,7 +620,7 @@ class Tube:
         """
         2D surface area calculator
         """
-        # Discretizing along radial and tangential direction 
+        # Discretizing along radial and tangential direction
         t = np.linspace(0, 2 * np.pi, self.nt + 1)
         r = np.linspace(self.r - self.t, self.r, self.nr)
         theta = np.diff(t)
@@ -637,7 +637,7 @@ class Tube:
         """
         3D surface area calculator
         """
-        # Discretizing along radial, tangential and axial direction 
+        # Discretizing along radial, tangential and axial direction
         t = np.linspace(0, 2 * np.pi, self.nt + 1)
         r = np.linspace(self.r - self.t, self.r, self.nr)
         z = np.linspace(0, self.h, self.nz)
@@ -646,16 +646,12 @@ class Tube:
 
         surface_area = np.zeros((self.nr - 1, self.nz - 1, self.nt))
         surface_area[0, :, :] = heights[:, np.newaxis] * theta[np.newaxis, :] * r[0]
-        surface_area[-1, :, :] = (
-            heights[:, np.newaxis] * theta[np.newaxis, :] * r[-1]
-        )
-        surface_area = np.concatenate(
-            (surface_area[0, :, :], surface_area[-1, :, :])
-        )
+        surface_area[-1, :, :] = heights[:, np.newaxis] * theta[np.newaxis, :] * r[-1]
+        surface_area = np.concatenate((surface_area[0, :, :], surface_area[-1, :, :]))
         surface_area = surface_area.flatten()
 
         return surface_area
-    
+
     def element_volumes(self):
         """Calculate the element volumes
 

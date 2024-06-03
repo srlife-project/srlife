@@ -45,20 +45,28 @@ class TestPIAModel(unittest.TestCase):
         # t = (np.linspace(0, 2 * np.pi, self.nt)[1])/2
         t = np.linspace(0, 2 * np.pi, self.nt)[1]
         ns1 = np.vstack([np.cos(t), np.sin(t), np.zeros_like(t)]).T
-        ns2 = np.vstack(
-            [np.zeros_like(t), np.zeros_like(t), np.ones_like(t)]).T
-        ns3 = np.vstack(
-            [np.zeros_like(t), np.zeros_like(t), -np.ones_like(t)]).T
-        ns4 = np.vstack(
-            [np.zeros_like(t), np.zeros_like(t), np.zeros_like(t)]).T
+        ns2 = np.vstack([np.zeros_like(t), np.zeros_like(t), np.ones_like(t)]).T
+        ns3 = np.vstack([np.zeros_like(t), np.zeros_like(t), -np.ones_like(t)]).T
+        ns4 = np.vstack([np.zeros_like(t), np.zeros_like(t), np.zeros_like(t)]).T
 
         # Normals for ID
         normals1 = np.stack((-ns1, ns2, ns3), axis=1)
         normals2 = np.stack((ns2, ns3, ns4), axis=1)
         normals3 = np.stack((ns1, ns2, ns3), axis=1)
 
-        self.normals = np.stack((normals1, normals2, normals2, normals2,
-                                 normals2, normals2, normals2, normals3), axis=1).reshape(-1, 3, 3)
+        self.normals = np.stack(
+            (
+                normals1,
+                normals2,
+                normals2,
+                normals2,
+                normals2,
+                normals2,
+                normals2,
+                normals3,
+            ),
+            axis=1,
+        ).reshape(-1, 3, 3)
         np.set_printoptions(threshold=np.inf)
         # Surface areas of 8 elements along radial direction
         self.surface_areas = np.loadtxt(
@@ -68,25 +76,27 @@ class TestPIAModel(unittest.TestCase):
             ),
             delimiter=",",
         )
-        
+
         self.nr = 8
         self.nt = 24
         self.nz = 2
 
         # Calculating and printing surface areas of surface elements
-        t = np.linspace(0, 2 * np.pi, self.nt+1)
+        t = np.linspace(0, 2 * np.pi, self.nt + 1)
         r = np.linspace(self.r - self.t, self.r, self.nr)
         z = np.linspace(0, self.h, self.nz)
         theta = np.diff(t)
         heights = np.diff(z)
-    
-        surface_area2 = np.zeros((self.nr-1,self.nz-1,self.nt))
-        surface_area2[0,:,:] = heights[:,np.newaxis]*theta[np.newaxis,:]*r[0]
-        surface_area2[-1,:,:] = heights[:,np.newaxis]*theta[np.newaxis,:]*r[-1]
-        surface_area2 = np.concatenate((surface_area2[0,:,:],surface_area2[-1,:,:]))
-    
+
+        surface_area2 = np.zeros((self.nr - 1, self.nz - 1, self.nt))
+        surface_area2[0, :, :] = heights[:, np.newaxis] * theta[np.newaxis, :] * r[0]
+        surface_area2[-1, :, :] = heights[:, np.newaxis] * theta[np.newaxis, :] * r[-1]
+        surface_area2 = np.concatenate(
+            (surface_area2[0, :, :], surface_area2[-1, :, :])
+        )
+
         self.stress = data.reshape(data.shape[0], 8, -1)
-   
+
         vol_factor = 360 / 15
 
         self.volumes = np.loadtxt(
@@ -103,7 +113,7 @@ class TestPIAModel(unittest.TestCase):
         # Number of cycles to failure
         self.nf = 100
         self.period = 0.01
-        print("service life =", self.nf*self.period)
+        print("service life =", self.nf * self.period)
         self.time = np.linspace(0, self.period, self.stress.shape[0])
 
         # Material properties
@@ -124,8 +134,8 @@ class TestPIAModel(unittest.TestCase):
 
         self.material = materials.StandardCeramicMaterial(
             np.array([0, 1000.0]),
-            np.array([self.su_v,self.su_v]),
-            np.array([self.su_s,self.su_s]),
+            np.array([self.su_v, self.su_v]),
+            np.array([self.su_s, self.su_s]),
             np.array([0, 1000.0]),
             np.array([self.s0_v, self.s0_v]),
             np.array([self.s0_s, self.s0_s]),
@@ -184,6 +194,7 @@ class TestPIAModel(unittest.TestCase):
             external_file.write("\n")
             external_file.write(f"{Pf_PIA_v}")
 
+
 class TestWNTSAModel(unittest.TestCase):
     def setUp(self):
         data = np.loadtxt(
@@ -212,22 +223,30 @@ class TestWNTSAModel(unittest.TestCase):
         self.surface = np.outer(np.outer(r, theta), z).flatten()
 
         # Taking only one element along theta
-        t = (np.linspace(0, 2 * np.pi, self.nt)[1])/2
+        t = (np.linspace(0, 2 * np.pi, self.nt)[1]) / 2
         ns1 = np.vstack([np.cos(t), np.sin(t), np.zeros_like(t)]).T
-        ns2 = np.vstack(
-            [np.zeros_like(t), np.zeros_like(t), np.ones_like(t)]).T
-        ns3 = np.vstack(
-            [np.zeros_like(t), np.zeros_like(t), -np.ones_like(t)]).T
-        ns4 = np.vstack(
-            [np.zeros_like(t), np.zeros_like(t), np.zeros_like(t)]).T
+        ns2 = np.vstack([np.zeros_like(t), np.zeros_like(t), np.ones_like(t)]).T
+        ns3 = np.vstack([np.zeros_like(t), np.zeros_like(t), -np.ones_like(t)]).T
+        ns4 = np.vstack([np.zeros_like(t), np.zeros_like(t), np.zeros_like(t)]).T
 
         # Normals for ID
         normals1 = np.stack((-ns1, ns2, ns3), axis=1)
         normals2 = np.stack((ns2, ns3, ns4), axis=1)
         normals3 = np.stack((ns1, ns2, ns3), axis=1)
 
-        self.normals = np.stack((normals1, normals2, normals2, normals2,
-                                 normals2, normals2, normals2, normals3), axis=1).reshape(-1, 3, 3)
+        self.normals = np.stack(
+            (
+                normals1,
+                normals2,
+                normals2,
+                normals2,
+                normals2,
+                normals2,
+                normals2,
+                normals3,
+            ),
+            axis=1,
+        ).reshape(-1, 3, 3)
         np.set_printoptions(threshold=np.inf)
         # Surface areas of 8 elements along radial direction
         self.surface_areas = np.loadtxt(
@@ -256,7 +275,7 @@ class TestWNTSAModel(unittest.TestCase):
         # Number of cycles to failure
         self.nf = 1
         self.period = 0.01
-        print("service life =", self.nf*self.period)
+        print("service life =", self.nf * self.period)
         self.time = np.linspace(0, self.period, self.stress.shape[0])
 
         # Material properties
@@ -277,8 +296,8 @@ class TestWNTSAModel(unittest.TestCase):
 
         self.material = materials.StandardCeramicMaterial(
             np.array([0, 1000.0]),
-            np.array([self.su_v,self.su_v]),
-            np.array([self.su_s,self.su_s]),
+            np.array([self.su_v, self.su_v]),
+            np.array([self.su_s, self.su_s]),
             np.array([0, 1000.0]),
             np.array([self.s0_v, self.s0_v]),
             np.array([self.s0_s, self.s0_s]),
@@ -337,6 +356,7 @@ class TestWNTSAModel(unittest.TestCase):
             external_file.write("\n")
             external_file.write(f"{Pf_WNTSA_v}")
 
+
 class TestMTSModelGriffithFlaw(unittest.TestCase):
     def setUp(self):
         data = np.loadtxt(
@@ -365,22 +385,30 @@ class TestMTSModelGriffithFlaw(unittest.TestCase):
         self.surface = np.outer(np.outer(r, theta), z).flatten()
 
         # Taking only one element along theta
-        t = (np.linspace(0, 2 * np.pi, self.nt)[1])/2
+        t = (np.linspace(0, 2 * np.pi, self.nt)[1]) / 2
         ns1 = np.vstack([np.cos(t), np.sin(t), np.zeros_like(t)]).T
-        ns2 = np.vstack(
-            [np.zeros_like(t), np.zeros_like(t), np.ones_like(t)]).T
-        ns3 = np.vstack(
-            [np.zeros_like(t), np.zeros_like(t), -np.ones_like(t)]).T
-        ns4 = np.vstack(
-            [np.zeros_like(t), np.zeros_like(t), np.zeros_like(t)]).T
+        ns2 = np.vstack([np.zeros_like(t), np.zeros_like(t), np.ones_like(t)]).T
+        ns3 = np.vstack([np.zeros_like(t), np.zeros_like(t), -np.ones_like(t)]).T
+        ns4 = np.vstack([np.zeros_like(t), np.zeros_like(t), np.zeros_like(t)]).T
 
         # Normals for ID
         normals1 = np.stack((-ns1, ns2, ns3), axis=1)
         normals2 = np.stack((ns2, ns3, ns4), axis=1)
         normals3 = np.stack((ns1, ns2, ns3), axis=1)
 
-        self.normals = np.stack((normals1, normals2, normals2, normals2,
-                                 normals2, normals2, normals2, normals3), axis=1).reshape(-1, 3, 3)
+        self.normals = np.stack(
+            (
+                normals1,
+                normals2,
+                normals2,
+                normals2,
+                normals2,
+                normals2,
+                normals2,
+                normals3,
+            ),
+            axis=1,
+        ).reshape(-1, 3, 3)
         np.set_printoptions(threshold=np.inf)
         # Surface areas of 8 elements along radial direction
         self.surface_areas = np.loadtxt(
@@ -409,7 +437,7 @@ class TestMTSModelGriffithFlaw(unittest.TestCase):
         # Number of cycles to failure
         self.nf = 0
         self.period = 0.01
-        print("service life =", self.nf*self.period)
+        print("service life =", self.nf * self.period)
         self.time = np.linspace(0, self.period, self.stress.shape[0])
 
         # Material properties
@@ -430,8 +458,8 @@ class TestMTSModelGriffithFlaw(unittest.TestCase):
 
         self.material = materials.StandardCeramicMaterial(
             np.array([0, 1000.0]),
-            np.array([self.su_v,self.su_v]),
-            np.array([self.su_s,self.su_s]),
+            np.array([self.su_v, self.su_v]),
+            np.array([self.su_s, self.su_s]),
             np.array([0, 1000.0]),
             np.array([self.s0_v, self.s0_v]),
             np.array([self.s0_s, self.s0_s]),
@@ -447,7 +475,6 @@ class TestMTSModelGriffithFlaw(unittest.TestCase):
             np.array([self.Bv, self.Bv]),
             np.array([self.Bs, self.Bs]),
         )
-
 
         self.model_time_dep = damage.MTSModelGriffithFlaw(solverparams.ParameterSet())
 
@@ -472,14 +499,22 @@ class TestMTSModelGriffithFlaw(unittest.TestCase):
         )
 
         # Summing up log probabilities over nelem and taking the value of one
-        R_MTS_GF_s = np.exp(np.sum(actual1)) if actual1 is not None else print("surface reliability cannot be calculated")
+        R_MTS_GF_s = (
+            np.exp(np.sum(actual1))
+            if actual1 is not None
+            else print("surface reliability cannot be calculated")
+        )
         print("Time dep surface Reliability MTS_GF = ", R_MTS_GF_s)
 
         R_MTS_GF_v = np.exp(np.sum(actual2))
         print("Time dep volume Reliability MTS_GF = ", R_MTS_GF_v)
 
         # Evaluating Probability of Failure
-        Pf_MTS_GF_s = 1 - R_MTS_GF_s if R_MTS_GF_s is not None else print("surface failure probability cannot be calculated")
+        Pf_MTS_GF_s = (
+            1 - R_MTS_GF_s
+            if R_MTS_GF_s is not None
+            else print("surface failure probability cannot be calculated")
+        )
         print("Time dep surface Probability of failure MTS_GF = ", Pf_MTS_GF_s)
 
         Pf_MTS_GF_v = 1 - R_MTS_GF_v
@@ -490,6 +525,7 @@ class TestMTSModelGriffithFlaw(unittest.TestCase):
             external_file.write(f"{Pf_MTS_GF_s}")
             external_file.write("\n")
             external_file.write(f"{Pf_MTS_GF_v}")
+
 
 class TestMTSModelPennyShapedFlaw(unittest.TestCase):
     def setUp(self):
@@ -519,22 +555,30 @@ class TestMTSModelPennyShapedFlaw(unittest.TestCase):
         self.surface = np.outer(np.outer(r, theta), z).flatten()
 
         # Taking only one element along theta
-        t = (np.linspace(0, 2 * np.pi, self.nt)[1])/2
+        t = (np.linspace(0, 2 * np.pi, self.nt)[1]) / 2
         ns1 = np.vstack([np.cos(t), np.sin(t), np.zeros_like(t)]).T
-        ns2 = np.vstack(
-            [np.zeros_like(t), np.zeros_like(t), np.ones_like(t)]).T
-        ns3 = np.vstack(
-            [np.zeros_like(t), np.zeros_like(t), -np.ones_like(t)]).T
-        ns4 = np.vstack(
-            [np.zeros_like(t), np.zeros_like(t), np.zeros_like(t)]).T
+        ns2 = np.vstack([np.zeros_like(t), np.zeros_like(t), np.ones_like(t)]).T
+        ns3 = np.vstack([np.zeros_like(t), np.zeros_like(t), -np.ones_like(t)]).T
+        ns4 = np.vstack([np.zeros_like(t), np.zeros_like(t), np.zeros_like(t)]).T
 
         # Normals for ID
         normals1 = np.stack((-ns1, ns2, ns3), axis=1)
         normals2 = np.stack((ns2, ns3, ns4), axis=1)
         normals3 = np.stack((ns1, ns2, ns3), axis=1)
 
-        self.normals = np.stack((normals1, normals2, normals2, normals2,
-                                 normals2, normals2, normals2, normals3), axis=1).reshape(-1, 3, 3)
+        self.normals = np.stack(
+            (
+                normals1,
+                normals2,
+                normals2,
+                normals2,
+                normals2,
+                normals2,
+                normals2,
+                normals3,
+            ),
+            axis=1,
+        ).reshape(-1, 3, 3)
         np.set_printoptions(threshold=np.inf)
         # Surface areas of 8 elements along radial direction
         self.surface_areas = np.loadtxt(
@@ -563,7 +607,7 @@ class TestMTSModelPennyShapedFlaw(unittest.TestCase):
         # Number of cycles to failure
         self.nf = 0
         self.period = 0.01
-        print("service life =", self.nf*self.period)
+        print("service life =", self.nf * self.period)
         self.time = np.linspace(0, self.period, self.stress.shape[0])
 
         # Material properties
@@ -584,8 +628,8 @@ class TestMTSModelPennyShapedFlaw(unittest.TestCase):
 
         self.material = materials.StandardCeramicMaterial(
             np.array([0, 1000.0]),
-            np.array([self.su_v,self.su_v]),
-            np.array([self.su_s,self.su_s]),
+            np.array([self.su_v, self.su_v]),
+            np.array([self.su_s, self.su_s]),
             np.array([0, 1000.0]),
             np.array([self.s0_v, self.s0_v]),
             np.array([self.s0_s, self.s0_s]),
@@ -602,7 +646,9 @@ class TestMTSModelPennyShapedFlaw(unittest.TestCase):
             np.array([self.Bs, self.Bs]),
         )
 
-        self.model_time_dep = damage.MTSModelPennyShapedFlaw(solverparams.ParameterSet())
+        self.model_time_dep = damage.MTSModelPennyShapedFlaw(
+            solverparams.ParameterSet()
+        )
 
     def test_definition(self):
         actual1 = self.model_time_dep.calculate_surface_flaw_element_log_reliability(
@@ -644,6 +690,7 @@ class TestMTSModelPennyShapedFlaw(unittest.TestCase):
             external_file.write("\n")
             external_file.write(f"{Pf_MTS_PSF_v}")
 
+
 class TestCSEModelGriffithFlaw(unittest.TestCase):
     def setUp(self):
         data = np.loadtxt(
@@ -672,22 +719,30 @@ class TestCSEModelGriffithFlaw(unittest.TestCase):
         self.surface = np.outer(np.outer(r, theta), z).flatten()
 
         # Taking only one element along theta
-        t = (np.linspace(0, 2 * np.pi, self.nt)[1])/2
+        t = (np.linspace(0, 2 * np.pi, self.nt)[1]) / 2
         ns1 = np.vstack([np.cos(t), np.sin(t), np.zeros_like(t)]).T
-        ns2 = np.vstack(
-            [np.zeros_like(t), np.zeros_like(t), np.ones_like(t)]).T
-        ns3 = np.vstack(
-            [np.zeros_like(t), np.zeros_like(t), -np.ones_like(t)]).T
-        ns4 = np.vstack(
-            [np.zeros_like(t), np.zeros_like(t), np.zeros_like(t)]).T
+        ns2 = np.vstack([np.zeros_like(t), np.zeros_like(t), np.ones_like(t)]).T
+        ns3 = np.vstack([np.zeros_like(t), np.zeros_like(t), -np.ones_like(t)]).T
+        ns4 = np.vstack([np.zeros_like(t), np.zeros_like(t), np.zeros_like(t)]).T
 
         # Normals for ID
         normals1 = np.stack((-ns1, ns2, ns3), axis=1)
         normals2 = np.stack((ns2, ns3, ns4), axis=1)
         normals3 = np.stack((ns1, ns2, ns3), axis=1)
 
-        self.normals = np.stack((normals1, normals2, normals2, normals2,
-                                 normals2, normals2, normals2, normals3), axis=1).reshape(-1, 3, 3)
+        self.normals = np.stack(
+            (
+                normals1,
+                normals2,
+                normals2,
+                normals2,
+                normals2,
+                normals2,
+                normals2,
+                normals3,
+            ),
+            axis=1,
+        ).reshape(-1, 3, 3)
         np.set_printoptions(threshold=np.inf)
         # Surface areas of 8 elements along radial direction
         self.surface_areas = np.loadtxt(
@@ -716,7 +771,7 @@ class TestCSEModelGriffithFlaw(unittest.TestCase):
         # Number of cycles to failure
         self.nf = 100
         self.period = 0.01
-        print("service life =", self.nf*self.period)
+        print("service life =", self.nf * self.period)
         self.time = np.linspace(0, self.period, self.stress.shape[0])
 
         # Material properties
@@ -737,8 +792,8 @@ class TestCSEModelGriffithFlaw(unittest.TestCase):
 
         self.material = materials.StandardCeramicMaterial(
             np.array([0, 1000.0]),
-            np.array([self.su_v,self.su_v]),
-            np.array([self.su_s,self.su_s]),
+            np.array([self.su_v, self.su_v]),
+            np.array([self.su_s, self.su_s]),
             np.array([0, 1000.0]),
             np.array([self.s0_v, self.s0_v]),
             np.array([self.s0_s, self.s0_s]),
@@ -755,8 +810,7 @@ class TestCSEModelGriffithFlaw(unittest.TestCase):
             np.array([self.Bs, self.Bs]),
         )
 
-        self.model_time_dep = damage.CSEModelGriffithFlaw(
-            solverparams.ParameterSet())
+        self.model_time_dep = damage.CSEModelGriffithFlaw(solverparams.ParameterSet())
 
     def test_definition(self):
         actual1 = self.model_time_dep.calculate_surface_flaw_element_log_reliability(
@@ -798,6 +852,7 @@ class TestCSEModelGriffithFlaw(unittest.TestCase):
             external_file.write("\n")
             external_file.write(f"{Pf_CSE_GF_v}")
 
+
 class TestCSEModelPennyShapedFlaw(unittest.TestCase):
     def setUp(self):
         data = np.loadtxt(
@@ -826,22 +881,30 @@ class TestCSEModelPennyShapedFlaw(unittest.TestCase):
         self.surface = np.outer(np.outer(r, theta), z).flatten()
 
         # Taking only one element along theta
-        t = (np.linspace(0, 2 * np.pi, self.nt)[1])/2
+        t = (np.linspace(0, 2 * np.pi, self.nt)[1]) / 2
         ns1 = np.vstack([np.cos(t), np.sin(t), np.zeros_like(t)]).T
-        ns2 = np.vstack(
-            [np.zeros_like(t), np.zeros_like(t), np.ones_like(t)]).T
-        ns3 = np.vstack(
-            [np.zeros_like(t), np.zeros_like(t), -np.ones_like(t)]).T
-        ns4 = np.vstack(
-            [np.zeros_like(t), np.zeros_like(t), np.zeros_like(t)]).T
+        ns2 = np.vstack([np.zeros_like(t), np.zeros_like(t), np.ones_like(t)]).T
+        ns3 = np.vstack([np.zeros_like(t), np.zeros_like(t), -np.ones_like(t)]).T
+        ns4 = np.vstack([np.zeros_like(t), np.zeros_like(t), np.zeros_like(t)]).T
 
         # Normals for ID
         normals1 = np.stack((-ns1, ns2, ns3), axis=1)
         normals2 = np.stack((ns2, ns3, ns4), axis=1)
         normals3 = np.stack((ns1, ns2, ns3), axis=1)
 
-        self.normals = np.stack((normals1, normals2, normals2, normals2,
-                                 normals2, normals2, normals2, normals3), axis=1).reshape(-1, 3, 3)
+        self.normals = np.stack(
+            (
+                normals1,
+                normals2,
+                normals2,
+                normals2,
+                normals2,
+                normals2,
+                normals2,
+                normals3,
+            ),
+            axis=1,
+        ).reshape(-1, 3, 3)
         np.set_printoptions(threshold=np.inf)
         # Surface areas of 8 elements along radial direction
         self.surface_areas = np.loadtxt(
@@ -870,7 +933,7 @@ class TestCSEModelPennyShapedFlaw(unittest.TestCase):
         # Number of cycles to failure
         self.nf = 0
         self.period = 0.01
-        print("service life =", self.nf*self.period)
+        print("service life =", self.nf * self.period)
         self.time = np.linspace(0, self.period, self.stress.shape[0])
 
         # Material properties
@@ -891,8 +954,8 @@ class TestCSEModelPennyShapedFlaw(unittest.TestCase):
 
         self.material = materials.StandardCeramicMaterial(
             np.array([0, 1000.0]),
-            np.array([self.su_v,self.su_v]),
-            np.array([self.su_s,self.su_s]),
+            np.array([self.su_v, self.su_v]),
+            np.array([self.su_s, self.su_s]),
             np.array([0, 1000.0]),
             np.array([self.s0_v, self.s0_v]),
             np.array([self.s0_s, self.s0_s]),
@@ -910,7 +973,8 @@ class TestCSEModelPennyShapedFlaw(unittest.TestCase):
         )
 
         self.model_time_dep = damage.CSEModelPennyShapedFlaw(
-            solverparams.ParameterSet())
+            solverparams.ParameterSet()
+        )
 
     def test_definition(self):
         actual1 = self.model_time_dep.calculate_surface_flaw_element_log_reliability(
@@ -952,6 +1016,7 @@ class TestCSEModelPennyShapedFlaw(unittest.TestCase):
             external_file.write("\n")
             external_file.write(f"{Pf_CSE_PSF_v}")
 
+
 class TestCSEModelGriffithNotch(unittest.TestCase):
     def setUp(self):
         data = np.loadtxt(
@@ -980,22 +1045,30 @@ class TestCSEModelGriffithNotch(unittest.TestCase):
         self.surface = np.outer(np.outer(r, theta), z).flatten()
 
         # Taking only one element along theta
-        t = (np.linspace(0, 2 * np.pi, self.nt)[1])/2
+        t = (np.linspace(0, 2 * np.pi, self.nt)[1]) / 2
         ns1 = np.vstack([np.cos(t), np.sin(t), np.zeros_like(t)]).T
-        ns2 = np.vstack(
-            [np.zeros_like(t), np.zeros_like(t), np.ones_like(t)]).T
-        ns3 = np.vstack(
-            [np.zeros_like(t), np.zeros_like(t), -np.ones_like(t)]).T
-        ns4 = np.vstack(
-            [np.zeros_like(t), np.zeros_like(t), np.zeros_like(t)]).T
+        ns2 = np.vstack([np.zeros_like(t), np.zeros_like(t), np.ones_like(t)]).T
+        ns3 = np.vstack([np.zeros_like(t), np.zeros_like(t), -np.ones_like(t)]).T
+        ns4 = np.vstack([np.zeros_like(t), np.zeros_like(t), np.zeros_like(t)]).T
 
         # Normals for ID
         normals1 = np.stack((-ns1, ns2, ns3), axis=1)
         normals2 = np.stack((ns2, ns3, ns4), axis=1)
         normals3 = np.stack((ns1, ns2, ns3), axis=1)
 
-        self.normals = np.stack((normals1, normals2, normals2, normals2,
-                                 normals2, normals2, normals2, normals3), axis=1).reshape(-1, 3, 3)
+        self.normals = np.stack(
+            (
+                normals1,
+                normals2,
+                normals2,
+                normals2,
+                normals2,
+                normals2,
+                normals2,
+                normals3,
+            ),
+            axis=1,
+        ).reshape(-1, 3, 3)
         np.set_printoptions(threshold=np.inf)
         # Surface areas of 8 elements along radial direction
         self.surface_areas = np.loadtxt(
@@ -1024,7 +1097,7 @@ class TestCSEModelGriffithNotch(unittest.TestCase):
         # Number of cycles to failure
         self.nf = 0
         self.period = 0.01
-        print("service life =", self.nf*self.period)
+        print("service life =", self.nf * self.period)
         self.time = np.linspace(0, self.period, self.stress.shape[0])
 
         # Material properties
@@ -1045,8 +1118,8 @@ class TestCSEModelGriffithNotch(unittest.TestCase):
 
         self.material = materials.StandardCeramicMaterial(
             np.array([0, 1000.0]),
-            np.array([self.su_v,self.su_v]),
-            np.array([self.su_s,self.su_s]),
+            np.array([self.su_v, self.su_v]),
+            np.array([self.su_s, self.su_s]),
             np.array([0, 1000.0]),
             np.array([self.s0_v, self.s0_v]),
             np.array([self.s0_s, self.s0_s]),
@@ -1063,8 +1136,7 @@ class TestCSEModelGriffithNotch(unittest.TestCase):
             np.array([self.Bs, self.Bs]),
         )
 
-        self.model_time_dep = damage.CSEModelGriffithNotch(
-            solverparams.ParameterSet())
+        self.model_time_dep = damage.CSEModelGriffithNotch(solverparams.ParameterSet())
 
     def test_definition(self):
         actual1 = self.model_time_dep.calculate_surface_flaw_element_log_reliability(
@@ -1106,6 +1178,7 @@ class TestCSEModelGriffithNotch(unittest.TestCase):
             external_file.write("\n")
             external_file.write(f"{Pf_CSE_GN_v}")
 
+
 class TestSMMModelGriffithFlaw(unittest.TestCase):
     def setUp(self):
         data = np.loadtxt(
@@ -1134,22 +1207,30 @@ class TestSMMModelGriffithFlaw(unittest.TestCase):
         self.surface = np.outer(np.outer(r, theta), z).flatten()
 
         # Taking only one element along theta
-        t = (np.linspace(0, 2 * np.pi, self.nt)[1])/2
+        t = (np.linspace(0, 2 * np.pi, self.nt)[1]) / 2
         ns1 = np.vstack([np.cos(t), np.sin(t), np.zeros_like(t)]).T
-        ns2 = np.vstack(
-            [np.zeros_like(t), np.zeros_like(t), np.ones_like(t)]).T
-        ns3 = np.vstack(
-            [np.zeros_like(t), np.zeros_like(t), -np.ones_like(t)]).T
-        ns4 = np.vstack(
-            [np.zeros_like(t), np.zeros_like(t), np.zeros_like(t)]).T
+        ns2 = np.vstack([np.zeros_like(t), np.zeros_like(t), np.ones_like(t)]).T
+        ns3 = np.vstack([np.zeros_like(t), np.zeros_like(t), -np.ones_like(t)]).T
+        ns4 = np.vstack([np.zeros_like(t), np.zeros_like(t), np.zeros_like(t)]).T
 
         # Normals for ID
         normals1 = np.stack((-ns1, ns2, ns3), axis=1)
         normals2 = np.stack((ns2, ns3, ns4), axis=1)
         normals3 = np.stack((ns1, ns2, ns3), axis=1)
 
-        self.normals = np.stack((normals1, normals2, normals2, normals2,
-                                 normals2, normals2, normals2, normals3), axis=1).reshape(-1, 3, 3)
+        self.normals = np.stack(
+            (
+                normals1,
+                normals2,
+                normals2,
+                normals2,
+                normals2,
+                normals2,
+                normals2,
+                normals3,
+            ),
+            axis=1,
+        ).reshape(-1, 3, 3)
         np.set_printoptions(threshold=np.inf)
         # Surface areas of 8 elements along radial direction
         self.surface_areas = np.loadtxt(
@@ -1178,7 +1259,7 @@ class TestSMMModelGriffithFlaw(unittest.TestCase):
         # Number of cycles to failure
         self.nf = 100
         self.period = 0.01
-        print("service life =", self.nf*self.period)
+        print("service life =", self.nf * self.period)
         self.time = np.linspace(0, self.period, self.stress.shape[0])
 
         # Material properties
@@ -1199,8 +1280,8 @@ class TestSMMModelGriffithFlaw(unittest.TestCase):
 
         self.material = materials.StandardCeramicMaterial(
             np.array([0, 1000.0]),
-            np.array([self.su_v,self.su_v]),
-            np.array([self.su_s,self.su_s]),
+            np.array([self.su_v, self.su_v]),
+            np.array([self.su_s, self.su_s]),
             np.array([0, 1000.0]),
             np.array([self.s0_v, self.s0_v]),
             np.array([self.s0_s, self.s0_s]),
@@ -1217,8 +1298,7 @@ class TestSMMModelGriffithFlaw(unittest.TestCase):
             np.array([self.Bs, self.Bs]),
         )
 
-        self.model_time_dep = damage.SMMModelGriffithFlaw(
-            solverparams.ParameterSet())
+        self.model_time_dep = damage.SMMModelGriffithFlaw(solverparams.ParameterSet())
 
     def test_definition(self):
         actual1 = self.model_time_dep.calculate_surface_flaw_element_log_reliability(
@@ -1260,6 +1340,7 @@ class TestSMMModelGriffithFlaw(unittest.TestCase):
             external_file.write("\n")
             external_file.write(f"{Pf_SMM_GF_v}")
 
+
 class TestSMMModelGriffithNotch(unittest.TestCase):
     def setUp(self):
         data = np.loadtxt(
@@ -1288,22 +1369,30 @@ class TestSMMModelGriffithNotch(unittest.TestCase):
         self.surface = np.outer(np.outer(r, theta), z).flatten()
 
         # Taking only one element along theta
-        t = (np.linspace(0, 2 * np.pi, self.nt)[1])/2
+        t = (np.linspace(0, 2 * np.pi, self.nt)[1]) / 2
         ns1 = np.vstack([np.cos(t), np.sin(t), np.zeros_like(t)]).T
-        ns2 = np.vstack(
-            [np.zeros_like(t), np.zeros_like(t), np.ones_like(t)]).T
-        ns3 = np.vstack(
-            [np.zeros_like(t), np.zeros_like(t), -np.ones_like(t)]).T
-        ns4 = np.vstack(
-            [np.zeros_like(t), np.zeros_like(t), np.zeros_like(t)]).T
+        ns2 = np.vstack([np.zeros_like(t), np.zeros_like(t), np.ones_like(t)]).T
+        ns3 = np.vstack([np.zeros_like(t), np.zeros_like(t), -np.ones_like(t)]).T
+        ns4 = np.vstack([np.zeros_like(t), np.zeros_like(t), np.zeros_like(t)]).T
 
         # Normals for ID
         normals1 = np.stack((-ns1, ns2, ns3), axis=1)
         normals2 = np.stack((ns2, ns3, ns4), axis=1)
         normals3 = np.stack((ns1, ns2, ns3), axis=1)
 
-        self.normals = np.stack((normals1, normals2, normals2, normals2,
-                                 normals2, normals2, normals2, normals3), axis=1).reshape(-1, 3, 3)
+        self.normals = np.stack(
+            (
+                normals1,
+                normals2,
+                normals2,
+                normals2,
+                normals2,
+                normals2,
+                normals2,
+                normals3,
+            ),
+            axis=1,
+        ).reshape(-1, 3, 3)
         np.set_printoptions(threshold=np.inf)
         # Surface areas of 8 elements along radial direction
         self.surface_areas = np.loadtxt(
@@ -1332,7 +1421,7 @@ class TestSMMModelGriffithNotch(unittest.TestCase):
         # Number of cycles to failure
         self.nf = 0
         self.period = 0.01
-        print("service life =", self.nf*self.period)
+        print("service life =", self.nf * self.period)
         self.time = np.linspace(0, self.period, self.stress.shape[0])
 
         # Material properties
@@ -1353,8 +1442,8 @@ class TestSMMModelGriffithNotch(unittest.TestCase):
 
         self.material = materials.StandardCeramicMaterial(
             np.array([0, 1000.0]),
-            np.array([self.su_v,self.su_v]),
-            np.array([self.su_s,self.su_s]),
+            np.array([self.su_v, self.su_v]),
+            np.array([self.su_s, self.su_s]),
             np.array([0, 1000.0]),
             np.array([self.s0_v, self.s0_v]),
             np.array([self.s0_s, self.s0_s]),
@@ -1371,8 +1460,7 @@ class TestSMMModelGriffithNotch(unittest.TestCase):
             np.array([self.Bs, self.Bs]),
         )
 
-        self.model_time_dep = damage.SMMModelGriffithNotch(
-            solverparams.ParameterSet())
+        self.model_time_dep = damage.SMMModelGriffithNotch(solverparams.ParameterSet())
 
     def test_definition(self):
         actual1 = self.model_time_dep.calculate_surface_flaw_element_log_reliability(
@@ -1414,6 +1502,7 @@ class TestSMMModelGriffithNotch(unittest.TestCase):
             external_file.write("\n")
             external_file.write(f"{Pf_SMM_GN_v}")
 
+
 class TestSMMModelPennyShapedFlaw(unittest.TestCase):
     def setUp(self):
         data = np.loadtxt(
@@ -1442,22 +1531,30 @@ class TestSMMModelPennyShapedFlaw(unittest.TestCase):
         self.surface = np.outer(np.outer(r, theta), z).flatten()
 
         # Taking only one element along theta
-        t = (np.linspace(0, 2 * np.pi, self.nt)[1])/2
+        t = (np.linspace(0, 2 * np.pi, self.nt)[1]) / 2
         ns1 = np.vstack([np.cos(t), np.sin(t), np.zeros_like(t)]).T
-        ns2 = np.vstack(
-            [np.zeros_like(t), np.zeros_like(t), np.ones_like(t)]).T
-        ns3 = np.vstack(
-            [np.zeros_like(t), np.zeros_like(t), -np.ones_like(t)]).T
-        ns4 = np.vstack(
-            [np.zeros_like(t), np.zeros_like(t), np.zeros_like(t)]).T
+        ns2 = np.vstack([np.zeros_like(t), np.zeros_like(t), np.ones_like(t)]).T
+        ns3 = np.vstack([np.zeros_like(t), np.zeros_like(t), -np.ones_like(t)]).T
+        ns4 = np.vstack([np.zeros_like(t), np.zeros_like(t), np.zeros_like(t)]).T
 
         # Normals for ID
         normals1 = np.stack((-ns1, ns2, ns3), axis=1)
         normals2 = np.stack((ns2, ns3, ns4), axis=1)
         normals3 = np.stack((ns1, ns2, ns3), axis=1)
 
-        self.normals = np.stack((normals1, normals2, normals2, normals2,
-                                 normals2, normals2, normals2, normals3), axis=1).reshape(-1, 3, 3)
+        self.normals = np.stack(
+            (
+                normals1,
+                normals2,
+                normals2,
+                normals2,
+                normals2,
+                normals2,
+                normals2,
+                normals3,
+            ),
+            axis=1,
+        ).reshape(-1, 3, 3)
         np.set_printoptions(threshold=np.inf)
         # Surface areas of 8 elements along radial direction
         self.surface_areas = np.loadtxt(
@@ -1486,7 +1583,7 @@ class TestSMMModelPennyShapedFlaw(unittest.TestCase):
         # Number of cycles to failure
         self.nf = 0
         self.period = 0.01
-        print("service life =", self.nf*self.period)
+        print("service life =", self.nf * self.period)
         self.time = np.linspace(0, self.period, self.stress.shape[0])
 
         # Material properties
@@ -1507,8 +1604,8 @@ class TestSMMModelPennyShapedFlaw(unittest.TestCase):
 
         self.material = materials.StandardCeramicMaterial(
             np.array([0, 1000.0]),
-            np.array([self.su_v,self.su_v]),
-            np.array([self.su_s,self.su_s]),
+            np.array([self.su_v, self.su_v]),
+            np.array([self.su_s, self.su_s]),
             np.array([0, 1000.0]),
             np.array([self.s0_v, self.s0_v]),
             np.array([self.s0_s, self.s0_s]),
@@ -1526,7 +1623,8 @@ class TestSMMModelPennyShapedFlaw(unittest.TestCase):
         )
 
         self.model_time_dep = damage.SMMModelPennyShapedFlaw(
-            solverparams.ParameterSet())
+            solverparams.ParameterSet()
+        )
 
     def test_definition(self):
         actual1 = self.model_time_dep.calculate_surface_flaw_element_log_reliability(
@@ -1568,6 +1666,7 @@ class TestSMMModelPennyShapedFlaw(unittest.TestCase):
             external_file.write("\n")
             external_file.write(f"{Pf_SMM_PSF_v}")
 
+
 class TestSMMModelSemiCircularCrack(unittest.TestCase):
     def setUp(self):
         data = np.loadtxt(
@@ -1596,22 +1695,30 @@ class TestSMMModelSemiCircularCrack(unittest.TestCase):
         self.surface = np.outer(np.outer(r, theta), z).flatten()
 
         # Taking only one element along theta
-        t = (np.linspace(0, 2 * np.pi, self.nt)[1])/2
+        t = (np.linspace(0, 2 * np.pi, self.nt)[1]) / 2
         ns1 = np.vstack([np.cos(t), np.sin(t), np.zeros_like(t)]).T
-        ns2 = np.vstack(
-            [np.zeros_like(t), np.zeros_like(t), np.ones_like(t)]).T
-        ns3 = np.vstack(
-            [np.zeros_like(t), np.zeros_like(t), -np.ones_like(t)]).T
-        ns4 = np.vstack(
-            [np.zeros_like(t), np.zeros_like(t), np.zeros_like(t)]).T
+        ns2 = np.vstack([np.zeros_like(t), np.zeros_like(t), np.ones_like(t)]).T
+        ns3 = np.vstack([np.zeros_like(t), np.zeros_like(t), -np.ones_like(t)]).T
+        ns4 = np.vstack([np.zeros_like(t), np.zeros_like(t), np.zeros_like(t)]).T
 
         # Normals for ID
         normals1 = np.stack((-ns1, ns2, ns3), axis=1)
         normals2 = np.stack((ns2, ns3, ns4), axis=1)
         normals3 = np.stack((ns1, ns2, ns3), axis=1)
 
-        self.normals = np.stack((normals1, normals2, normals2, normals2,
-                                 normals2, normals2, normals2, normals3), axis=1).reshape(-1, 3, 3)
+        self.normals = np.stack(
+            (
+                normals1,
+                normals2,
+                normals2,
+                normals2,
+                normals2,
+                normals2,
+                normals2,
+                normals3,
+            ),
+            axis=1,
+        ).reshape(-1, 3, 3)
         np.set_printoptions(threshold=np.inf)
         # Surface areas of 8 elements along radial direction
         self.surface_areas = np.loadtxt(
@@ -1640,7 +1747,7 @@ class TestSMMModelSemiCircularCrack(unittest.TestCase):
         # Number of cycles to failure
         self.nf = 100
         self.period = 0.01
-        print("service life =", self.nf*self.period)
+        print("service life =", self.nf * self.period)
         self.time = np.linspace(0, self.period, self.stress.shape[0])
 
         # Material properties
@@ -1661,8 +1768,8 @@ class TestSMMModelSemiCircularCrack(unittest.TestCase):
 
         self.material = materials.StandardCeramicMaterial(
             np.array([0, 1000.0]),
-            np.array([self.su_v,self.su_v]),
-            np.array([self.su_s,self.su_s]),
+            np.array([self.su_v, self.su_v]),
+            np.array([self.su_s, self.su_s]),
             np.array([0, 1000.0]),
             np.array([self.s0_v, self.s0_v]),
             np.array([self.s0_s, self.s0_s]),

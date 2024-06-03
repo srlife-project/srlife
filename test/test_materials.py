@@ -243,8 +243,8 @@ class TestStructuralMaterial(unittest.TestCase):
 class TestStandardCeramicMaterial(unittest.TestCase):
     def setUp(self):
         self.suTs = np.array([25.0, 800.0, 1000.0, 1200.0, 1400.0, 1500.0])
-        self.su_v = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0 ])
-        self.su_s = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0 ])
+        self.su_v = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+        self.su_s = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
         self.s0Ts = np.array([25.0, 800.0, 1000.0, 1200.0, 1400.0, 1500.0])
         self.s0s_v = np.array([507.0, 467.0, 528.0, 570.0, 746.0, 461.0])
         self.s0s_s = np.array([507.0, 467.0, 528.0, 570.0, 746.0, 461.0])
@@ -306,7 +306,7 @@ class TestStandardCeramicMaterial(unittest.TestCase):
         b = ifn(T)
 
         self.assertAlmostEqual(a, b)
-    
+
     def test_strength_surf(self):
         ifn = inter.interp1d(self.s0Ts, self.s0s_s)
         T = 1099.1
@@ -324,7 +324,7 @@ class TestStandardCeramicMaterial(unittest.TestCase):
         b = ifn(T)
 
         self.assertAlmostEqual(a, b)
-    
+
     def test_m_s(self):
         ifn = inter.interp1d(self.mTs, self.ms_s)
         T = 1099.1
@@ -357,7 +357,7 @@ class TestStandardCeramicMaterial(unittest.TestCase):
         b = ifn(T)
 
         self.assertAlmostEqual(a, b)
-    
+
     def test_Ns(self):
         ifn = inter.interp1d(self.NvTs, self.Nss)
         T = 1099.1
@@ -375,7 +375,7 @@ class TestStandardCeramicMaterial(unittest.TestCase):
         b = ifn(T)
 
         self.assertAlmostEqual(a, b)
-    
+
     def test_Bs(self):
         ifn = inter.interp1d(self.BvTs, self.Bss)
         T = 1099.1

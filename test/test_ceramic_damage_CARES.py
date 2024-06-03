@@ -8,6 +8,8 @@ import os.path
 from srlife import materials, damage, solverparams
 
 p2 = 1.793
+
+
 class TestPIAModel(unittest.TestCase):
     def setUp(self):
 
@@ -76,7 +78,7 @@ class TestPIAModel(unittest.TestCase):
             )
         nelem = self.stress.shape[0]
         ntime_steps = 1
-        self.stress = self.stress.reshape(ntime_steps,nelem,-1)
+        self.stress = self.stress.reshape(ntime_steps, nelem, -1)
         # self.stress = np.array([[sigma_xx[0],sigma_yy[0],sigma_zz[0],np.sqrt(2)*sigma_yz[0],
         #     np.sqrt(2)*sigma_xz[0],np.sqrt(2)*sigma_xy[0]]])
         # for i in range(1,row_count):
@@ -85,18 +87,18 @@ class TestPIAModel(unittest.TestCase):
 
         # self.temperatures = np.ones(row_count)
         self.temperatures = np.ones((ntime_steps, nelem))
-        
+
         # Number of cycles to failure
         self.nf = 100
         self.period = 1
-        print("service life =", self.nf*self.period)
-        self.time = np.linspace(0, self.period,ntime_steps+1)
+        print("service life =", self.nf * self.period)
+        self.time = np.linspace(0, self.period, ntime_steps + 1)
 
         # Material properties (modified)
         self.su_v = 283.56497051
         self.su_s = 283.56497051
         # self.m_v = 28.53 # 2Parameter
-        self.m_v = 3.4132857 # 3Parameter
+        self.m_v = 3.4132857  # 3Parameter
         self.m_s = 28.53
         # self.s0_v = 350.864  # in mm  169.7 in m 2Parameter
         self.s0_v = 72.47538312  # in mm  169.7 in m
@@ -110,8 +112,8 @@ class TestPIAModel(unittest.TestCase):
 
         self.material = materials.StandardCeramicMaterial(
             np.array([0, 1000.0]),
-            np.array([self.su_v,self.su_v]),
-            np.array([self.su_s,self.su_s]),
+            np.array([self.su_v, self.su_v]),
+            np.array([self.su_s, self.su_s]),
             np.array([0, 1000.0]),
             np.array([self.s0_v, self.s0_v]),
             np.array([self.s0_s, self.s0_s]),
@@ -234,21 +236,21 @@ class TestWNTSAModel(unittest.TestCase):
 
         nelem = self.stress.shape[0]
         ntime_steps = 1
-        self.stress = self.stress.reshape(ntime_steps,nelem,-1)
-        
+        self.stress = self.stress.reshape(ntime_steps, nelem, -1)
+
         self.temperatures = np.ones((ntime_steps, nelem))
 
         # Number of cycles to failure
         self.nf = 100
         self.period = 1
-        print("service life =", self.nf*self.period)
-        self.time = np.linspace(0, self.period,ntime_steps+1)
+        print("service life =", self.nf * self.period)
+        self.time = np.linspace(0, self.period, ntime_steps + 1)
 
         # Material properties (modified)
         self.su_v = 283.56497051
         self.su_s = 283.56497051
         # self.m_v = 28.53 # 2Parameter
-        self.m_v = 3.4132857 # 3Parameter
+        self.m_v = 3.4132857  # 3Parameter
         self.m_s = 28.53
         # self.s0_v = 350.864  # in mm  169.7 in m 2Parameter
         self.s0_v = 72.47538312  # in mm  169.7 in m
@@ -262,8 +264,8 @@ class TestWNTSAModel(unittest.TestCase):
 
         self.material = materials.StandardCeramicMaterial(
             np.array([0, 1000.0]),
-            np.array([self.su_v,self.su_v]),
-            np.array([self.su_s,self.su_s]),
+            np.array([self.su_v, self.su_v]),
+            np.array([self.su_s, self.su_s]),
             np.array([0, 1000.0]),
             np.array([self.s0_v, self.s0_v]),
             np.array([self.s0_s, self.s0_s]),
@@ -304,7 +306,7 @@ class TestWNTSAModel(unittest.TestCase):
         # plt.show()
 
         print("Pf_weibull = ", Pf_weibull)
-        
+
         with open("WNTSA_vol.txt", "a+") as external_file:
             external_file.write("\n")
             external_file.write(f"{Pf_weibull}")
@@ -375,21 +377,21 @@ class TestMTSModelGriffithFlaw(unittest.TestCase):
 
         nelem = self.stress.shape[0]
         ntime_steps = 1
-        self.stress = self.stress.reshape(ntime_steps,nelem,-1)
+        self.stress = self.stress.reshape(ntime_steps, nelem, -1)
 
         self.temperatures = np.ones((ntime_steps, nelem))
 
         # Number of cycles to failure
         self.nf = 100
         self.period = 1
-        print("service life =", self.nf*self.period)
-        self.time = np.linspace(0, self.period,ntime_steps+1)
+        print("service life =", self.nf * self.period)
+        self.time = np.linspace(0, self.period, ntime_steps + 1)
 
         # Material properties (modified)
         self.su_v = 283.56497051
         self.su_s = 283.56497051
         # self.m_v = 28.53 # 2Parameter
-        self.m_v = 3.4132857 # 3Parameter
+        self.m_v = 3.4132857  # 3Parameter
         self.m_s = 28.53
         # self.s0_v = 350.864  # in mm  169.7 in m 2Parameter
         self.s0_v = 72.47538312  # in mm  169.7 in m
@@ -403,8 +405,8 @@ class TestMTSModelGriffithFlaw(unittest.TestCase):
 
         self.material = materials.StandardCeramicMaterial(
             np.array([0, 1000.0]),
-            np.array([self.su_v,self.su_v]),
-            np.array([self.su_s,self.su_s]),
+            np.array([self.su_v, self.su_v]),
+            np.array([self.su_s, self.su_s]),
             np.array([0, 1000.0]),
             np.array([self.s0_v, self.s0_v]),
             np.array([self.s0_s, self.s0_s]),
@@ -516,21 +518,21 @@ class TestMTSModelPennyShapedFlaw(unittest.TestCase):
 
         nelem = self.stress.shape[0]
         ntime_steps = 1
-        self.stress = self.stress.reshape(ntime_steps,nelem,-1)
+        self.stress = self.stress.reshape(ntime_steps, nelem, -1)
 
         self.temperatures = np.ones((ntime_steps, nelem))
 
         # Number of cycles to failure
         self.nf = 100
         self.period = 1
-        print("service life =", self.nf*self.period)
-        self.time = np.linspace(0, self.period,ntime_steps+1)
+        print("service life =", self.nf * self.period)
+        self.time = np.linspace(0, self.period, ntime_steps + 1)
 
         # Material properties (modified)
         self.su_v = 283.56497051
         self.su_s = 283.56497051
         # self.m_v = 28.53 # 2Parameter
-        self.m_v = 3.4132857 # 3Parameter
+        self.m_v = 3.4132857  # 3Parameter
         self.m_s = 28.53
         # self.s0_v = 350.864  # in mm  169.7 in m 2Parameter
         self.s0_v = 72.47538312  # in mm  169.7 in m
@@ -544,8 +546,8 @@ class TestMTSModelPennyShapedFlaw(unittest.TestCase):
 
         self.material = materials.StandardCeramicMaterial(
             np.array([0, 1000.0]),
-            np.array([self.su_v,self.su_v]),
-            np.array([self.su_s,self.su_s]),
+            np.array([self.su_v, self.su_v]),
+            np.array([self.su_s, self.su_s]),
             np.array([0, 1000.0]),
             np.array([self.s0_v, self.s0_v]),
             np.array([self.s0_s, self.s0_s]),
@@ -657,21 +659,21 @@ class TestCSEModelGriffithFlaw(unittest.TestCase):
 
         nelem = self.stress.shape[0]
         ntime_steps = 1
-        self.stress = self.stress.reshape(ntime_steps,nelem,-1)
+        self.stress = self.stress.reshape(ntime_steps, nelem, -1)
 
         self.temperatures = np.ones((ntime_steps, nelem))
 
         # Number of cycles to failure
         self.nf = 100
         self.period = 1
-        print("service life =", self.nf*self.period)
-        self.time = np.linspace(0, self.period,ntime_steps+1)
+        print("service life =", self.nf * self.period)
+        self.time = np.linspace(0, self.period, ntime_steps + 1)
 
         # Material properties (modified)
         self.su_v = 283.56497051
         self.su_s = 283.56497051
         # self.m_v = 28.53 # 2Parameter
-        self.m_v = 3.4132857 # 3Parameter
+        self.m_v = 3.4132857  # 3Parameter
         self.m_s = 28.53
         # self.s0_v = 350.864  # in mm  169.7 in m 2Parameter
         self.s0_v = 72.47538312  # in mm  169.7 in m
@@ -685,8 +687,8 @@ class TestCSEModelGriffithFlaw(unittest.TestCase):
 
         self.material = materials.StandardCeramicMaterial(
             np.array([0, 1000.0]),
-            np.array([self.su_v,self.su_v]),
-            np.array([self.su_s,self.su_s]),
+            np.array([self.su_v, self.su_v]),
+            np.array([self.su_s, self.su_s]),
             np.array([0, 1000.0]),
             np.array([self.s0_v, self.s0_v]),
             np.array([self.s0_s, self.s0_s]),
@@ -798,21 +800,21 @@ class TestCSEModelPennyShapedFlaw(unittest.TestCase):
 
         nelem = self.stress.shape[0]
         ntime_steps = 1
-        self.stress = self.stress.reshape(ntime_steps,nelem,-1)
-        
+        self.stress = self.stress.reshape(ntime_steps, nelem, -1)
+
         self.temperatures = np.ones((ntime_steps, nelem))
 
         # Number of cycles to failure
         self.nf = 100
         self.period = 1
-        print("service life =", self.nf*self.period)
-        self.time = np.linspace(0, self.period,ntime_steps+1)
+        print("service life =", self.nf * self.period)
+        self.time = np.linspace(0, self.period, ntime_steps + 1)
 
         # Material properties (modified)
         self.su_v = 283.56497051
         self.su_s = 283.56497051
         # self.m_v = 28.53 # 2Parameter
-        self.m_v = 3.4132857 # 3Parameter
+        self.m_v = 3.4132857  # 3Parameter
         self.m_s = 28.53
         # self.s0_v = 350.864  # in mm  169.7 in m 2Parameter
         self.s0_v = 72.47538312  # in mm  169.7 in m
@@ -826,8 +828,8 @@ class TestCSEModelPennyShapedFlaw(unittest.TestCase):
 
         self.material = materials.StandardCeramicMaterial(
             np.array([0, 1000.0]),
-            np.array([self.su_v,self.su_v]),
-            np.array([self.su_s,self.su_s]),
+            np.array([self.su_v, self.su_v]),
+            np.array([self.su_s, self.su_s]),
             np.array([0, 1000.0]),
             np.array([self.s0_v, self.s0_v]),
             np.array([self.s0_s, self.s0_s]),
@@ -939,21 +941,21 @@ class TestSMMModelGriffithFlaw(unittest.TestCase):
 
         nelem = self.stress.shape[0]
         ntime_steps = 1
-        self.stress = self.stress.reshape(ntime_steps,nelem,-1)
-        
+        self.stress = self.stress.reshape(ntime_steps, nelem, -1)
+
         self.temperatures = np.ones((ntime_steps, nelem))
 
         # Number of cycles to failure
         self.nf = 100
         self.period = 1
-        print("service life =", self.nf*self.period)
-        self.time = np.linspace(0, self.period,ntime_steps+1)
+        print("service life =", self.nf * self.period)
+        self.time = np.linspace(0, self.period, ntime_steps + 1)
 
         # Material properties (modified)
         self.su_v = 283.56497051
         self.su_s = 283.56497051
         # self.m_v = 28.53 # 2Parameter
-        self.m_v = 3.4132857 # 3Parameter
+        self.m_v = 3.4132857  # 3Parameter
         self.m_s = 28.53
         # self.s0_v = 350.864  # in mm  169.7 in m 2Parameter
         self.s0_v = 72.47538312  # in mm  169.7 in m
@@ -967,8 +969,8 @@ class TestSMMModelGriffithFlaw(unittest.TestCase):
 
         self.material = materials.StandardCeramicMaterial(
             np.array([0, 1000.0]),
-            np.array([self.su_v,self.su_v]),
-            np.array([self.su_s,self.su_s]),
+            np.array([self.su_v, self.su_v]),
+            np.array([self.su_s, self.su_s]),
             np.array([0, 1000.0]),
             np.array([self.s0_v, self.s0_v]),
             np.array([self.s0_s, self.s0_s]),
@@ -1080,21 +1082,21 @@ class TestSMMModelPennyShapedFlaw(unittest.TestCase):
 
         nelem = self.stress.shape[0]
         ntime_steps = 1
-        self.stress = self.stress.reshape(ntime_steps,nelem,-1)
-        
+        self.stress = self.stress.reshape(ntime_steps, nelem, -1)
+
         self.temperatures = np.ones((ntime_steps, nelem))
 
         # Number of cycles to failure
         self.nf = 100
         self.period = 1
-        print("service life =", self.nf*self.period)
-        self.time = np.linspace(0, self.period,ntime_steps+1)
+        print("service life =", self.nf * self.period)
+        self.time = np.linspace(0, self.period, ntime_steps + 1)
 
         # Material properties (modified)
         self.su_v = 283.56497051
         self.su_s = 283.56497051
         # self.m_v = 28.53 # 2Parameter
-        self.m_v = 3.4132857 # 3Parameter
+        self.m_v = 3.4132857  # 3Parameter
         self.m_s = 28.53
         # self.s0_v = 350.864  # in mm  169.7 in m 2Parameter
         self.s0_v = 72.47538312  # in mm  169.7 in m
@@ -1108,8 +1110,8 @@ class TestSMMModelPennyShapedFlaw(unittest.TestCase):
 
         self.material = materials.StandardCeramicMaterial(
             np.array([0, 1000.0]),
-            np.array([self.su_v,self.su_v]),
-            np.array([self.su_s,self.su_s]),
+            np.array([self.su_v, self.su_v]),
+            np.array([self.su_s, self.su_s]),
             np.array([0, 1000.0]),
             np.array([self.s0_v, self.s0_v]),
             np.array([self.s0_s, self.s0_s]),
