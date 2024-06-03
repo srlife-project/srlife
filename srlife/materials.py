@@ -844,15 +844,38 @@ class StandardCeramicMaterial:
         Parameters:
           node:    node with model
         """
+
         def extract_data_from_node(node, subnode_ids):
             return [
-                np.array(list(map(float,node.find(subnode_ids).text.strip().split())))
+                np.array(list(map(float, node.find(subnode_ids).text.strip().split())))
                 for subnode_id in subnode_ids
             ]
-        
-        threshold_v,threshold_s, strength_v, strength_s, m_v, m_s, Nv, Ns, Bv, Bs = extract_data_from_node(
-            node, 
-            ["threshold_vol","threshold_surf","strength_vol","strength_surf","modulus_vol","modulus_surf","fatigue_Nv","fatigue_Ns","fatigue_Bv","fatigue_Bs"]
+
+        (
+            threshold_v,
+            threshold_s,
+            strength_v,
+            strength_s,
+            m_v,
+            m_s,
+            Nv,
+            Ns,
+            Bv,
+            Bs,
+        ) = extract_data_from_node(
+            node,
+            [
+                "threshold_vol",
+                "threshold_surf",
+                "strength_vol",
+                "strength_surf",
+                "modulus_vol",
+                "modulus_surf",
+                "fatigue_Nv",
+                "fatigue_Ns",
+                "fatigue_Bv",
+                "fatigue_Bs",
+            ],
         )
 
         c_bar = float(node.find("c_bar").text)
@@ -920,32 +943,50 @@ class StandardCeramicMaterial:
         """
         Save to a particular file under a particular model name
         """
-        
+
         def create_element(parent, tag, subtags):
-            element = ET.SubElement(parent,tag)
+            element = ET.SubElement(parent, tag)
             for subtag, values in subtags.items():
                 subelement = ET.SubElement(element, subtag)
-                subelement.text = " ".join(map(str,values))
+                subelement.text = " ".join(map(str, values))
             return element
-        
 
         root = ET.Element("models")
 
         base = ET.SubElement(root, modelname, {"type": "StandardModel"})
 
-        create_element(base, "threshold_vol", {"temperatures": self.su_temperatures, "values": self.thresholds_v})
+        create_element(
+            base,
+            "threshold_vol",
+            {"temperatures": self.su_temperatures, "values": self.thresholds_v},
+        )
         create_element(base, "threshold_surf", {"values": self.thresholds_s})
-        create_element(base, "strength_vol", {"temperatures": self.s_temperatures, "values": self.strengths_v})
+        create_element(
+            base,
+            "strength_vol",
+            {"temperatures": self.s_temperatures, "values": self.strengths_v},
+        )
         create_element(base, "strength_surf", {"values": self.strengths_s})
-        create_element(base, "modulus_vol", {"temperatures": self.m_temperatures, "values": self.mvals_v})
+        create_element(
+            base,
+            "modulus_vol",
+            {"temperatures": self.m_temperatures, "values": self.mvals_v},
+        )
         create_element(base, "modulus_surf", {"values": self.mvals_s})
         ET.SubElement(base, "c_bar").text = str(self.C)
         ET.SubElement(base, "nu").text = str(self.nu_val)
-        create_element(base, "fatigue_Nv", {"temperatures": self.Nv_temperatures, "values": self.Nvvals})
+        create_element(
+            base,
+            "fatigue_Nv",
+            {"temperatures": self.Nv_temperatures, "values": self.Nvvals},
+        )
         create_element(base, "fatigue_Ns", {"values": self.Nsvals})
-        create_element(base, "fatigue_Bv", {"temperatures": self.Bv_temperatures, "values": self.Bvvals})
+        create_element(
+            base,
+            "fatigue_Bv",
+            {"temperatures": self.Bv_temperatures, "values": self.Bvvals},
+        )
         create_element(base, "fatigue_Bs", {"values": self.Bsvals})
-
 
         # # Volume flaw properties
         # threshold_v = ET.SubElement(base, "threshold_vol")
