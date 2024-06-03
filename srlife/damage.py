@@ -1792,7 +1792,7 @@ class WNTSAModel(CrackShapeIndependent):
         self.mandel_stress = mandel_stress
 
         suvals = material.threshold_surf(temperatures)
-        mvals = material.modulus_surf(temperatures)
+        # mvals = material.modulus_surf(temperatures)
         N = material.Ns(temperatures)
         B = material.Bs(temperatures)
 
@@ -1944,8 +1944,8 @@ class WNTSAModel(CrackShapeIndependent):
 
         # suvals = material.threshold_surf(temperatures)
         mvals = material.modulus_surf(temperatures)
-        N = material.Ns(temperatures)
-        B = material.Bs(temperatures)
+        # N = material.Ns(temperatures)
+        # B = material.Bs(temperatures)
 
         # Surface normals and surface elements
         # normals = surface_normals
