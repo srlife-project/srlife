@@ -844,137 +844,174 @@ class StandardCeramicMaterial:
         Parameters:
           node:    node with model
         """
-        threshold_v = node.find("threshold_vol")
-        su_temps = threshold_v.find("temperatures")
-        su_vals_v = threshold_v.find("values")
+        def extract_data_from_node(node, subnode_ids):
+            return [
+                np.array(list(map(float,node.find(subnode_ids).text.strip().split())))
+                for subnode_id in subnode_ids
+            ]
+        
+        threshold_v,threshold_s, strength_v, strength_s, m_v, m_s, Nv, Ns, Bv, Bs = extract_data_from_node(
+            node, 
+            ["threshold_vol","threshold_surf","strength_vol","strength_surf","modulus_vol","modulus_surf","fatigue_Nv","fatigue_Ns","fatigue_Bv","fatigue_Bs"]
+        )
 
-        threshold_s = node.find("threshold_surf")
-        su_vals_s = threshold_s.find("values")
+        c_bar = float(node.find("c_bar").text)
+        nu_val = float(node.find("nu").text)
 
-        strength_v = node.find("strength_vol")
-        s_temps = strength_v.find("temperatures")
-        svals_v = strength_v.find("values")
+        # threshold_v = node.find("threshold_vol")
+        # su_temps = threshold_v.find("temperatures")
+        # su_vals_v = threshold_v.find("values")
 
-        strength_s = node.find("strength_surf")
-        svals_s = strength_s.find("values")
+        # threshold_s = node.find("threshold_surf")
+        # su_vals_s = threshold_s.find("values")
 
-        m_v = node.find("modulus_vol")
-        m_temps = m_v.find("temperatures")
-        mvals_v = m_v.find("values")
+        # strength_v = node.find("strength_vol")
+        # s_temps = strength_v.find("temperatures")
+        # svals_v = strength_v.find("values")
 
-        m_s = node.find("modulus_surf")
-        mvals_s = m_s.find("values")
+        # strength_s = node.find("strength_surf")
+        # svals_s = strength_s.find("values")
 
-        c_bar = node.find("c_bar")
-        nu = node.find("nu")
+        # m_v = node.find("modulus_vol")
+        # m_temps = m_v.find("temperatures")
+        # mvals_v = m_v.find("values")
 
-        Nv = node.find("fatigue_Nv")
-        Nv_temps = Nv.find("temperatures")
-        Nvvals = Nv.find("values")
+        # m_s = node.find("modulus_surf")
+        # mvals_s = m_s.find("values")
 
-        Ns = node.find("fatigue_Ns")
-        Nsvals = Ns.find("values")
+        # c_bar = node.find("c_bar")
+        # nu = node.find("nu")
 
-        Bv = node.find("fatigue_Bv")
-        Bv_temps = Bv.find("temperatures")
-        Bvvals = Bv.find("values")
+        # Nv = node.find("fatigue_Nv")
+        # Nv_temps = Nv.find("temperatures")
+        # Nvvals = Nv.find("values")
 
-        Bs = node.find("fatigue_Bs")
-        Bsvals = Bs.find("values")
+        # Ns = node.find("fatigue_Ns")
+        # Nsvals = Ns.find("values")
+
+        # Bv = node.find("fatigue_Bv")
+        # Bv_temps = Bv.find("temperatures")
+        # Bvvals = Bv.find("values")
+
+        # Bs = node.find("fatigue_Bs")
+        # Bsvals = Bs.find("values")
 
         return StandardCeramicMaterial(
-            np.array(list(map(float, su_temps.text.strip().split()))),
-            np.array(list(map(float, su_vals_v.text.strip().split()))),
-            np.array(list(map(float, su_vals_s.text.strip().split()))),
-            np.array(list(map(float, s_temps.text.strip().split()))),
-            np.array(list(map(float, svals_v.text.strip().split()))),
-            np.array(list(map(float, svals_s.text.strip().split()))),
-            np.array(list(map(float, m_temps.text.strip().split()))),
-            np.array(list(map(float, mvals_v.text.strip().split()))),
-            np.array(list(map(float, mvals_s.text.strip().split()))),
-            float(c_bar.text),
-            float(nu.text),
-            np.array(list(map(float, Nv_temps.text.strip().split()))),
-            np.array(list(map(float, Nvvals.text.strip().split()))),
-            np.array(list(map(float, Nsvals.text.strip().split()))),
-            np.array(list(map(float, Bv_temps.text.strip().split()))),
-            np.array(list(map(float, Bvvals.text.strip().split()))),
-            np.array(list(map(float, Bsvals.text.strip().split()))),
+            su_temperatures=threshold_v[0],
+            thresholds_v=threshold_v[1],
+            thresholds_s=threshold_s[1],
+            s_temperatures=strength_v[0],
+            strengths_v=strength_v[1],
+            strengths_s=strength_s[1],
+            m_temperatures=m_v[0],
+            modulus_v=m_v[1],
+            modulus_s=m_s[1],
+            c_bar=c_bar,
+            nu=nu_val,
+            Nv_temperatures=Nv[0],
+            Nvvals=Nv[1],
+            Nsvals=Ns[1],
+            Bv_temperatures=Bv[0],
+            Bvvals=Bv[1],
+            Bsvals=Bs[1],
         )
 
     def save(self, fname, modelname):
         """
         Save to a particular file under a particular model name
         """
+        
+        def create_element(parent, tag, subtags):
+            element = ET.SubElement(parent,tag)
+            for subtag, values in subtags.items():
+                subelement = ET.SubElement(element, subtag)
+                subelement.text = " ".join(map(str,values))
+            return element
+        
+
         root = ET.Element("models")
 
         base = ET.SubElement(root, modelname, {"type": "StandardModel"})
 
-        # Volume flaw properties
-        threshold_v = ET.SubElement(base, "threshold_vol")
-        su_temps = ET.SubElement(threshold_v, "temperatures")
-        su_temps.text = " ".join(map(str, self.su_temperatures))
-        thresholds_v = ET.SubElement(threshold_v, "values")
-        thresholds_v.text = " ".join(map(str, self.thresholds_v))
+        create_element(base, "threshold_vol", {"temperatures": self.su_temperatures, "values": self.thresholds_v})
+        create_element(base, "threshold_surf", {"values": self.thresholds_s})
+        create_element(base, "strength_vol", {"temperatures": self.s_temperatures, "values": self.strengths_v})
+        create_element(base, "strength_surf", {"values": self.strengths_s})
+        create_element(base, "modulus_vol", {"temperatures": self.m_temperatures, "values": self.mvals_v})
+        create_element(base, "modulus_surf", {"values": self.mvals_s})
+        ET.SubElement(base, "c_bar").text = str(self.C)
+        ET.SubElement(base, "nu").text = str(self.nu_val)
+        create_element(base, "fatigue_Nv", {"temperatures": self.Nv_temperatures, "values": self.Nvvals})
+        create_element(base, "fatigue_Ns", {"values": self.Nsvals})
+        create_element(base, "fatigue_Bv", {"temperatures": self.Bv_temperatures, "values": self.Bvvals})
+        create_element(base, "fatigue_Bs", {"values": self.Bsvals})
 
-        # Surface flaw properties
-        threshold_s = ET.SubElement(base, "threshold_surf")
-        thresholds_s = ET.SubElement(threshold_s, "values")
-        thresholds_s.text = " ".join(map(str, self.thresholds_s))
 
-        # Volume flaw properties
-        strength_v = ET.SubElement(base, "strength_vol")
-        s_temps = ET.SubElement(strength_v, "temperatures")
-        s_temps.text = " ".join(map(str, self.s_temperatures))
-        strengths_v = ET.SubElement(strength_v, "values")
-        strengths_v.text = " ".join(map(str, self.strengths_v))
+        # # Volume flaw properties
+        # threshold_v = ET.SubElement(base, "threshold_vol")
+        # su_temps = ET.SubElement(threshold_v, "temperatures")
+        # su_temps.text = " ".join(map(str, self.su_temperatures))
+        # thresholds_v = ET.SubElement(threshold_v, "values")
+        # thresholds_v.text = " ".join(map(str, self.thresholds_v))
 
-        # Surface flaw properties
-        strength_s = ET.SubElement(base, "strength_surf")
-        strengths_s = ET.SubElement(strength_s, "values")
-        strengths_s.text = " ".join(map(str, self.strengths_s))
+        # # Surface flaw properties
+        # threshold_s = ET.SubElement(base, "threshold_surf")
+        # thresholds_s = ET.SubElement(threshold_s, "values")
+        # thresholds_s.text = " ".join(map(str, self.thresholds_s))
 
-        # Volume flaw properties
-        m_v = ET.SubElement(base, "modulus_vol")
-        m_temps = ET.SubElement(m_v, "temperatures")
-        m_temps.text = " ".join(map(str, self.m_temperatures))
-        mvals_v = ET.SubElement(m_v, "values")
-        mvals_v.text = " ".join(map(str, self.mvals_v))
+        # # Volume flaw properties
+        # strength_v = ET.SubElement(base, "strength_vol")
+        # s_temps = ET.SubElement(strength_v, "temperatures")
+        # s_temps.text = " ".join(map(str, self.s_temperatures))
+        # strengths_v = ET.SubElement(strength_v, "values")
+        # strengths_v.text = " ".join(map(str, self.strengths_v))
 
-        # Surface flaw properties
-        m_s = ET.SubElement(base, "modulus_surf")
-        mvals_s = ET.SubElement(m_s, "values")
-        mvals_s.text = " ".join(map(str, self.mvals_s))
+        # # Surface flaw properties
+        # strength_s = ET.SubElement(base, "strength_surf")
+        # strengths_s = ET.SubElement(strength_s, "values")
+        # strengths_s.text = " ".join(map(str, self.strengths_s))
 
-        c_bar = ET.SubElement(base, "c_bar")
-        c_bar.text = str(self.C)
+        # # Volume flaw properties
+        # m_v = ET.SubElement(base, "modulus_vol")
+        # m_temps = ET.SubElement(m_v, "temperatures")
+        # m_temps.text = " ".join(map(str, self.m_temperatures))
+        # mvals_v = ET.SubElement(m_v, "values")
+        # mvals_v.text = " ".join(map(str, self.mvals_v))
 
-        nu = ET.SubElement(base, "nu")
-        nu.text = str(self.nu_val)
+        # # Surface flaw properties
+        # m_s = ET.SubElement(base, "modulus_surf")
+        # mvals_s = ET.SubElement(m_s, "values")
+        # mvals_s.text = " ".join(map(str, self.mvals_s))
 
-        # Volume flaw properties
-        Nv = ET.SubElement(base, "fatigue_Nv")
-        Nvtemps = ET.SubElement(Nv, "temperatures")
-        Nvtemps.text = " ".join(map(str, self.Nv_temperatures))
-        Nvvals = ET.SubElement(Nv, "values")
-        Nvvals.text = " ".join(map(str, self.Nvvals))
+        # c_bar = ET.SubElement(base, "c_bar")
+        # c_bar.text = str(self.C)
 
-        # Surface flaw properties
-        Ns = ET.SubElement(base, "fatigue_Ns")
-        Nsvals = ET.SubElement(Ns, "values")
-        Nsvals.text = " ".join(map(str, self.Nsvals))
+        # nu = ET.SubElement(base, "nu")
+        # nu.text = str(self.nu_val)
 
-        # Volume flaw properties
-        Bv = ET.SubElement(base, "fatigue_Bv")
-        Bvtemps = ET.SubElement(Bv, "temperatures")
-        Bvtemps.text = " ".join(map(str, self.Bv_temperatures))
-        Bvvals = ET.SubElement(Bv, "values")
-        Bvvals.text = " ".join(map(str, self.Bvvals))
+        # # Volume flaw properties
+        # Nv = ET.SubElement(base, "fatigue_Nv")
+        # Nvtemps = ET.SubElement(Nv, "temperatures")
+        # Nvtemps.text = " ".join(map(str, self.Nv_temperatures))
+        # Nvvals = ET.SubElement(Nv, "values")
+        # Nvvals.text = " ".join(map(str, self.Nvvals))
 
-        # Surface flaw properties
-        Bs = ET.SubElement(base, "fatigue_Bs")
-        Bsvals = ET.SubElement(Bs, "values")
-        Bsvals.text = " ".join(map(str, self.Bsvals))
+        # # Surface flaw properties
+        # Ns = ET.SubElement(base, "fatigue_Ns")
+        # Nsvals = ET.SubElement(Ns, "values")
+        # Nsvals.text = " ".join(map(str, self.Nsvals))
+
+        # # Volume flaw properties
+        # Bv = ET.SubElement(base, "fatigue_Bv")
+        # Bvtemps = ET.SubElement(Bv, "temperatures")
+        # Bvtemps.text = " ".join(map(str, self.Bv_temperatures))
+        # Bvvals = ET.SubElement(Bv, "values")
+        # Bvvals.text = " ".join(map(str, self.Bvvals))
+
+        # # Surface flaw properties
+        # Bs = ET.SubElement(base, "fatigue_Bs")
+        # Bsvals = ET.SubElement(Bs, "values")
+        # Bsvals.text = " ".join(map(str, self.Bsvals))
 
         tree = ET.ElementTree(element=root)
         tree.write(fname)
