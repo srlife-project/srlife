@@ -1,6 +1,7 @@
 """
   Solution managers actually walk a model through all the steps to solve
 """
+
 import multiprocess
 import numpy as np
 

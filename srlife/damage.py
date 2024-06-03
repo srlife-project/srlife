@@ -1919,7 +1919,6 @@ class WNTSAModel(CrackShapeIndependent):
         self.material = material
         self.mandel_stress = mandel_stress
 
-        # suvals = material.threshold_surf(temperatures)
         mvals = material.modulus_surf(temperatures)
 
         # Surface elements
@@ -1976,7 +1975,7 @@ class WNTSAModel(CrackShapeIndependent):
             )
 
         else:
-            # g = np.zeros(sigma_n_max.shape)
+            g = np.zeros(sigma_n_max.shape)
             sigma_n_0 = np.zeros(g.shape)
             integral = np.zeros(sigma_n_0.shape)
             flat = np.zeros((integral.reshape(integral.shape[:-2] + (-1,))).shape)
