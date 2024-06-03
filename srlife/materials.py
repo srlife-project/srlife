@@ -881,44 +881,6 @@ class StandardCeramicMaterial:
         c_bar = float(node.find("c_bar").text)
         nu_val = float(node.find("nu").text)
 
-        # threshold_v = node.find("threshold_vol")
-        # su_temps = threshold_v.find("temperatures")
-        # su_vals_v = threshold_v.find("values")
-
-        # threshold_s = node.find("threshold_surf")
-        # su_vals_s = threshold_s.find("values")
-
-        # strength_v = node.find("strength_vol")
-        # s_temps = strength_v.find("temperatures")
-        # svals_v = strength_v.find("values")
-
-        # strength_s = node.find("strength_surf")
-        # svals_s = strength_s.find("values")
-
-        # m_v = node.find("modulus_vol")
-        # m_temps = m_v.find("temperatures")
-        # mvals_v = m_v.find("values")
-
-        # m_s = node.find("modulus_surf")
-        # mvals_s = m_s.find("values")
-
-        # c_bar = node.find("c_bar")
-        # nu = node.find("nu")
-
-        # Nv = node.find("fatigue_Nv")
-        # Nv_temps = Nv.find("temperatures")
-        # Nvvals = Nv.find("values")
-
-        # Ns = node.find("fatigue_Ns")
-        # Nsvals = Ns.find("values")
-
-        # Bv = node.find("fatigue_Bv")
-        # Bv_temps = Bv.find("temperatures")
-        # Bvvals = Bv.find("values")
-
-        # Bs = node.find("fatigue_Bs")
-        # Bsvals = Bs.find("values")
-
         return StandardCeramicMaterial(
             su_temperatures=threshold_v[0],
             thresholds_v=threshold_v[1],
@@ -987,72 +949,6 @@ class StandardCeramicMaterial:
             {"temperatures": self.Bv_temperatures, "values": self.Bvvals},
         )
         create_element(base, "fatigue_Bs", {"values": self.Bsvals})
-
-        # # Volume flaw properties
-        # threshold_v = ET.SubElement(base, "threshold_vol")
-        # su_temps = ET.SubElement(threshold_v, "temperatures")
-        # su_temps.text = " ".join(map(str, self.su_temperatures))
-        # thresholds_v = ET.SubElement(threshold_v, "values")
-        # thresholds_v.text = " ".join(map(str, self.thresholds_v))
-
-        # # Surface flaw properties
-        # threshold_s = ET.SubElement(base, "threshold_surf")
-        # thresholds_s = ET.SubElement(threshold_s, "values")
-        # thresholds_s.text = " ".join(map(str, self.thresholds_s))
-
-        # # Volume flaw properties
-        # strength_v = ET.SubElement(base, "strength_vol")
-        # s_temps = ET.SubElement(strength_v, "temperatures")
-        # s_temps.text = " ".join(map(str, self.s_temperatures))
-        # strengths_v = ET.SubElement(strength_v, "values")
-        # strengths_v.text = " ".join(map(str, self.strengths_v))
-
-        # # Surface flaw properties
-        # strength_s = ET.SubElement(base, "strength_surf")
-        # strengths_s = ET.SubElement(strength_s, "values")
-        # strengths_s.text = " ".join(map(str, self.strengths_s))
-
-        # # Volume flaw properties
-        # m_v = ET.SubElement(base, "modulus_vol")
-        # m_temps = ET.SubElement(m_v, "temperatures")
-        # m_temps.text = " ".join(map(str, self.m_temperatures))
-        # mvals_v = ET.SubElement(m_v, "values")
-        # mvals_v.text = " ".join(map(str, self.mvals_v))
-
-        # # Surface flaw properties
-        # m_s = ET.SubElement(base, "modulus_surf")
-        # mvals_s = ET.SubElement(m_s, "values")
-        # mvals_s.text = " ".join(map(str, self.mvals_s))
-
-        # c_bar = ET.SubElement(base, "c_bar")
-        # c_bar.text = str(self.C)
-
-        # nu = ET.SubElement(base, "nu")
-        # nu.text = str(self.nu_val)
-
-        # # Volume flaw properties
-        # Nv = ET.SubElement(base, "fatigue_Nv")
-        # Nvtemps = ET.SubElement(Nv, "temperatures")
-        # Nvtemps.text = " ".join(map(str, self.Nv_temperatures))
-        # Nvvals = ET.SubElement(Nv, "values")
-        # Nvvals.text = " ".join(map(str, self.Nvvals))
-
-        # # Surface flaw properties
-        # Ns = ET.SubElement(base, "fatigue_Ns")
-        # Nsvals = ET.SubElement(Ns, "values")
-        # Nsvals.text = " ".join(map(str, self.Nsvals))
-
-        # # Volume flaw properties
-        # Bv = ET.SubElement(base, "fatigue_Bv")
-        # Bvtemps = ET.SubElement(Bv, "temperatures")
-        # Bvtemps.text = " ".join(map(str, self.Bv_temperatures))
-        # Bvvals = ET.SubElement(Bv, "values")
-        # Bvvals.text = " ".join(map(str, self.Bvvals))
-
-        # # Surface flaw properties
-        # Bs = ET.SubElement(base, "fatigue_Bs")
-        # Bsvals = ET.SubElement(Bs, "values")
-        # Bsvals.text = " ".join(map(str, self.Bsvals))
 
         tree = ET.ElementTree(element=root)
         tree.write(fname)
