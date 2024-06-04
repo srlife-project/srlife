@@ -845,60 +845,90 @@ class StandardCeramicMaterial:
           node:    node with model
         """
 
-        def extract_data_from_node(node, subnode_ids):
-            return [
-                np.array(list(map(float, node.find(subnode_id).text.strip().split())))
-                for subnode_id in subnode_ids
-            ]
+        def _load_threshold_data(node):
+            threshold_v = node.find("threshold_vol")
+            su_temps = threshold_v.find("temperatures")
+            su_vals_v = threshold_v.find("values")
 
-        (
-            threshold_v,
-            threshold_s,
-            strength_v,
-            strength_s,
-            m_v,
-            m_s,
-            Nv,
-            Ns,
-            Bv,
-            Bs,
-        ) = extract_data_from_node(
-            node,
-            [
-                "threshold_vol",
-                "threshold_surf",
-                "strength_vol",
-                "strength_surf",
-                "modulus_vol",
-                "modulus_surf",
-                "fatigue_Nv",
-                "fatigue_Ns",
-                "fatigue_Bv",
-                "fatigue_Bs",
-            ],
-        )
+            threshold_s = node.find("threshold_surf")
+            su_vals_s = threshold_s.find("values")
+
+            return (
+                np.array(list(map(float, su_temps.text.strip().split()))),
+                np.array(list(map(float, su_vals_v.text.strip().split()))),
+                np.array(list(map(float, su_vals_s.text.strip().split()))),
+            )
+
+        def _load_strength_data(node):
+            strength_v = node.find("strength_vol")
+            s_temps = strength_v.find("temperatures")
+            svals_v = strength_v.find("values")
+
+            strength_s = node.find("strength_surf")
+            svals_s = strength_s.find("values")
+
+            return (
+                np.array(list(map(float, s_temps.text.strip().split()))),
+                np.array(list(map(float, svals_v.text.strip().split()))),
+                np.array(list(map(float, svals_s.text.strip().split()))),
+            )
+
+        def _load_modulus_data(node):
+            m_v = node.find("modulus_vol")
+            m_temps = m_v.find("temperatures")
+            mvals_v = m_v.find("values")
+
+            m_s = node.find("modulus_surf")
+            mvals_s = m_s.find("values")
+
+            return (
+                np.array(list(map(float, m_temps.text.strip().split()))),
+                np.array(list(map(float, mvals_v.text.strip().split()))),
+                np.array(list(map(float, mvals_s.text.strip().split()))),
+            )
+
+        def _load_fatigue_data(node):
+            Nv = node.find("fatigue_Nv")
+            Nv_temps = Nv.find("temperatures")
+            Nvvals = Nv.find("values")
+
+            Ns = node.find("fatigue_Ns")
+            Nsvals = Ns.find("values")
+
+            Bv = node.find("fatigue_Bv")
+            Bv_temps = Bv.find("temperatures")
+            Bvvals = Bv.find("values")
+
+            Bs = node.find("fatigue_Bs")
+            Bsvals = Bs.find("values")
+
+            return (
+                np.array(list(map(float, Nv_temps.text.strip().split()))),
+                np.array(list(map(float, Nvvals.text.strip().split()))),
+                np.array(list(map(float, Nsvals.text.strip().split()))),
+                np.array(list(map(float, Bv_temps.text.strip().split()))),
+                np.array(list(map(float, Bvvals.text.strip().split()))),
+                np.array(list(map(float, Bsvals.text.strip().split()))),
+            )
+
+        thresholds = _load_threshold_data(node)
+
+        strength_data = _load_strength_data(node)
+
+        modulus_data = _load_modulus_data(node)
+
+        fatigue_data = _load_fatigue_data(node)
 
         c_bar = float(node.find("c_bar").text)
-        nu_val = float(node.find("nu").text)
+        nu = float(node.find("nu").text)
 
         return StandardCeramicMaterial(
-            su_temperatures=threshold_v[0],
-            thresholds_v=threshold_v[1],
-            thresholds_s=threshold_s[1],
-            s_temperatures=strength_v[0],
-            strengths_v=strength_v[1],
-            strengths_s=strength_s[1],
-            m_temperatures=m_v[0],
-            modulus_v=m_v[1],
-            modulus_s=m_s[1],
-            c_bar=c_bar,
-            nu=nu_val,
-            Nv_temperatures=Nv[0],
-            Nvvals=Nv[1],
-            Nsvals=Ns[1],
-            Bv_temperatures=Bv[0],
-            Bvvals=Bv[1],
-            Bsvals=Bs[1],
+            *thresholds,
+            *strength_data,
+            *modulus_data,
+            c_bar,
+            nu,
+            *fatigue_data,
         )
 
     def save(self, fname, modelname):
