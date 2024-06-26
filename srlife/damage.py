@@ -927,9 +927,9 @@ class CrackShapeDependent(WeibullFailureModel):
         temperatures,
         material,
         tot_time,
-        A,
-        dalpha,
-        dbeta,
+        # A,
+        # dalpha,
+        # dbeta,
     ):
         """
         Calculate the integral of equivalent stresses given the material
@@ -956,16 +956,18 @@ class CrackShapeDependent(WeibullFailureModel):
         self.mandel_stress = mandel_stress
 
         self.suvals = material.threshold_vol(temperatures)
+        self.svals = material.strength_vol(temperatures)
         self.mvals = material.modulus_vol(temperatures)
         N = material.Nv(temperatures)
         B = material.Bv(temperatures)
 
         # Temperature average values
         suavg = np.mean(self.suvals, axis=0)
+        savg = np.mean(self.svals, axis=0)
         mavg = np.mean(self.mvals, axis=0)
         Navg = np.mean(N, axis=0)
         Bavg = np.mean(B, axis=0)
-
+        
         # Paging arrays
         if self.page:
             sigma_e = np.memmap(
@@ -1023,7 +1025,7 @@ class CrackShapeDependent(WeibullFailureModel):
 
         # Max principal stresss over all time steps for each element
         sigma_e_max = np.max(sigma_e, axis=0)
-
+        
         # Calculating ratio of cyclic stress to max cyclic stress (in one cycle)
         # for time-independent and time-dependent cases
         if np.all(time == 0):
@@ -1048,6 +1050,13 @@ class CrackShapeDependent(WeibullFailureModel):
                 + (sigma_e_max ** (Navg[..., None, None] - 2))
             ) ** (1 / (Navg[..., None, None] - 2))
 
+            # Modifying threshold stress using scale parameter
+            sigma_e_0_max = np.max(sigma_e_0)
+            if sigma_e_0_max > suavg[0]:
+                suavg = suavg
+            else:
+                suavg = (sigma_e_0_max/(savg[0] + suavg[0]))*suavg[0]
+            
             # Subtracting threshold stress
             sigma_e_0 -= suavg[..., None, None]
             sigma_e_0[sigma_e_0 < 0] = 0
@@ -1065,7 +1074,7 @@ class CrackShapeDependent(WeibullFailureModel):
 
         # Summing over area integral elements ignoring NaN values
         flat = np.nansum(flat, axis=-1)
-
+        
         return flat
 
     def calculate_surface_flaw_flattened_eq_stress(
@@ -1077,7 +1086,7 @@ class CrackShapeDependent(WeibullFailureModel):
         temperatures,
         material,
         tot_time,
-        ddelta,
+        # ddelta,
     ):
         """
         Calculate the integral of equivalent stresses given the material
@@ -1104,6 +1113,7 @@ class CrackShapeDependent(WeibullFailureModel):
         self.mandel_stress = mandel_stress
 
         suvals = material.threshold_surf(temperatures)
+        svals = material.strength_surf(temperatures)
         mvals = material.modulus_surf(temperatures)
         N = material.Ns(temperatures)
         B = material.Bs(temperatures)
@@ -1113,6 +1123,7 @@ class CrackShapeDependent(WeibullFailureModel):
 
         # Temperature average values
         suavg = np.mean(suvals, axis=0)[:count_surface_elements]
+        savg = np.mean(svals, axis=0)[:count_surface_elements]
         mavg = np.mean(mvals, axis=0)[:count_surface_elements]
         Navg = np.mean(N, axis=0)[:count_surface_elements]
         Bavg = np.mean(B, axis=0)[:count_surface_elements]
@@ -1205,6 +1216,13 @@ class CrackShapeDependent(WeibullFailureModel):
                 + (sigma_e_max ** (Navg[..., None, None, None] - 2))
             ) ** (1 / (Navg[..., None, None, None] - 2))
 
+            # Modifying threshold stress using scale parameter
+            sigma_e_0_max = np.max(sigma_e_0)
+            if sigma_e_0_max > suavg[0]:
+                suavg = suavg
+            else:
+                suavg = (sigma_e_0_max/(savg[0] + suavg[0]))*suavg[0]
+                
             # Subtracting threshold stress
             sigma_e_0 -= suavg[..., None, None, None]
             sigma_e_0[sigma_e_0 < 0] = 0
@@ -1284,23 +1302,24 @@ class CrackShapeDependent(WeibullFailureModel):
             kbar = 2 * mavg + 1
 
         kpvals = kbar * kavg
-
+        
         # Equivalent stress raied to exponent mv
-        try:
-            flat = (
-                self.calculate_volume_flaw_flattened_eq_stress(
-                    time,
-                    mandel_stress,
-                    self.temperatures,
-                    self.material,
-                    tot_time,
-                    self.A,
-                    self.dalpha,
-                    self.dbeta,
-                )
-            ) ** (1 / mavg)
-        except AttributeError:
-            flat = 0.0
+        # try:
+        flat = (
+            self.calculate_volume_flaw_flattened_eq_stress(
+                time,
+                mandel_stress,
+                self.temperatures,
+                self.material,
+                tot_time,
+                # self.A,
+                # self.dalpha,
+                # self.dbeta,
+            )
+        ) ** (1 / mavg)
+        # except AttributeError:
+        #     flat = 0.0
+            
 
         # Log reliability in each element
         log_reliability = -(2 * kpvals / np.pi) * (flat**mavg) * volumes
@@ -1386,21 +1405,21 @@ class CrackShapeDependent(WeibullFailureModel):
         kpvals = kbar * kavg
 
         # Equivalent stress raied to exponent mv
-        try:
-            flat = (
-                self.calculate_surface_flaw_flattened_eq_stress(
-                    time,
-                    mandel_stress,
-                    surface,
-                    normals,
-                    self.temperatures,
-                    self.material,
-                    tot_time,
-                    self.ddelta,
-                )
-            ) ** (1 / mavg)
-        except AttributeError:
-            flat = 0.0
+        # try:
+        flat = (
+            self.calculate_surface_flaw_flattened_eq_stress(
+                time,
+                mandel_stress,
+                surface,
+                normals,
+                self.temperatures,
+                self.material,
+                tot_time,
+                # self.ddelta,
+            )
+        ) ** (1 / mavg)
+        # except AttributeError:
+        #     flat = 0.0
 
         # Log reliability in each element
         log_reliability = -(2 * kpvals / np.pi) * (flat**mavg) * surface_areas
@@ -1655,12 +1674,14 @@ class WNTSAModel(CrackShapeIndependent):
         self.mandel_stress = mandel_stress
 
         suvals = material.threshold_vol(temperatures)
+        svals = material.strength_vol(temperatures)
         mvals = material.modulus_vol(temperatures)
         N = material.Nv(temperatures)
         B = material.Bv(temperatures)
 
         # Temperature average values
         suavg = np.mean(suvals, axis=0)
+        savg = np.mean(svals, axis=0)
         mavg = np.mean(mvals, axis=0)
         Navg = np.mean(N, axis=0)
         Bavg = np.mean(B, axis=0)
@@ -1744,6 +1765,13 @@ class WNTSAModel(CrackShapeIndependent):
                 + (sigma_n_max ** (Navg[..., None, None] - 2))
             ) ** (1 / (Navg[..., None, None] - 2))
 
+            # Modifying threshold stress using scale parameter
+            sigma_n_0_max = np.max(sigma_n_0)
+            if sigma_n_0_max > suavg[0]:
+                suavg = suavg
+            else:
+                suavg = (sigma_n_0_max/(savg[0] + suavg[0]))*suavg[0]
+
             # Subtracting threshold stress
             sigma_n_0 -= suavg[..., None, None]
             sigma_n_0[sigma_n_0 < 0] = 0
@@ -1791,6 +1819,7 @@ class WNTSAModel(CrackShapeIndependent):
         self.mandel_stress = mandel_stress
 
         suvals = material.threshold_surf(temperatures)
+        svals = material.strength_surf(temperatures)
         # mvals = material.modulus_surf(temperatures)
         N = material.Ns(temperatures)
         B = material.Bs(temperatures)
@@ -1804,6 +1833,7 @@ class WNTSAModel(CrackShapeIndependent):
 
         # Temperature average values
         suavg = np.mean(suvals, axis=0)[:count_surface_elements]
+        savg = np.mean(svals, axis=0)[:count_surface_elements]
         Navg = np.mean(N, axis=0)[:count_surface_elements]
         Bavg = np.mean(B, axis=0)[:count_surface_elements]
 
@@ -1885,6 +1915,13 @@ class WNTSAModel(CrackShapeIndependent):
                 + (sigma_n_max ** (Navg[..., None, None, None] - 2))
             ) ** (1 / (Navg[..., None, None, None] - 2))
 
+            # Modifying threshold stress using scale parameter
+            sigma_n_0_max = np.max(sigma_n_0)
+            if sigma_n_0_max > suavg[0]:
+                suavg = suavg
+            else:
+                suavg = (sigma_n_0_max/(savg[0] + suavg[0]))*suavg[0]
+            
             # Subtracting threshold stress
             sigma_n_0 -= suavg[..., None, None, None]
             sigma_n_0[sigma_n_0 < 0] = 0
